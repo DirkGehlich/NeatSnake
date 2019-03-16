@@ -29,6 +29,7 @@ public class World extends JFrame implements KeyListener {
 	Snake enemySnake;
 	
 	List<Snake> snakes = new ArrayList<Snake>();
+	List<Point> food = new ArrayList<Point>();
 	
 	PlayArea playArea;
 	
@@ -80,12 +81,22 @@ public class World extends JFrame implements KeyListener {
 	public void moveSnakes() {
 		for (Snake snake : snakes) {
 			if (!snake.isDead()) {
-				snake.think();
+				snake.think(BOARDSIZE, getEnemySnakesCoords(), food);
 				snake.move();
 				if (isDead(snake))
 					snake.kill();
 			}
 		}			
+	}
+	
+	private List<Point> getEnemySnakesCoords() {
+		List<Point> snakeCoords = new ArrayList<Point>();
+		
+		// TODO: replace by snake array
+		snakeCoords.add(enemySnake.head);
+		snakeCoords.addAll(enemySnake.tail);
+		
+		return snakeCoords;
 	}
 	
 	private boolean isDead(Snake snake) {
