@@ -24,12 +24,11 @@ public class World extends JFrame implements KeyListener {
 	final int FIELD_SIZE = 50;
 	final int FRAME_WIDTH = 800;
 	final int FRAME_HEIGHT = 600;
-	final int POPULATIONSIZE = 100;
-	final int MOVETIME_MS = 100;
+	final int POPULATIONSIZE = 200;
+	final int MOVETIME_MS = 10;
 	
 	Snake enemySnake;
 	private Population population = new Population(POPULATIONSIZE, BOARDSIZE);
-	List<Point> food = new ArrayList<Point>();
 	
 	PlayArea playArea;
 	
@@ -41,7 +40,7 @@ public class World extends JFrame implements KeyListener {
 	
 	public World() {
 		int playAreaSize = BOARDSIZE * FIELD_SIZE + MARGIN;
-		setSize(playAreaSize + 500, playAreaSize + 200);
+		setSize(playAreaSize + 500, playAreaSize + 250);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setFocusable(true);
@@ -88,8 +87,7 @@ public class World extends JFrame implements KeyListener {
 			dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
 		}
 		else if (arg0.getKeyCode() == KeyEvent.VK_SPACE) {
-			
-			moveEnemySnakeRandomly();
+			population.setTraining(!population.isTraining());
 		}		
 	}
 	
@@ -133,7 +131,7 @@ public class World extends JFrame implements KeyListener {
 			world.moveEnemySnakeRandomly();
 			
 			// TODO: pass population as parameter to ctor?
-			population.moveSnakes(getEnemySnakesCoords(), food);		
+			population.moveSnakes(getEnemySnakesCoords());		
 
 			world.update();
 		}
@@ -172,46 +170,89 @@ public class World extends JFrame implements KeyListener {
 				}
 			}
 
-			// Draw Snakes
-			for (GoodSnake snake : population.getSnakes()) {
+			if (population.isTraining()) {
+				// Draw Food
+	//			for (GoodSnake snake : population.getSnakes()) {
+	//				
+	//				// Food
+	//				g.setColor(Color.BLUE);
+	//				for (Point food : snake.getFood()) {
+	//					g.fillRect(MARGIN + food.x * FIELD_SIZE, MARGIN + food.y * FIELD_SIZE, FIELD_SIZE, FIELD_SIZE);
+	//				}
+	//			}
 				
-				// Food
-				g.setColor(Color.BLUE);
-				g.fillRect(MARGIN + snake.getFood().x * FIELD_SIZE, MARGIN + snake.getFood().y * FIELD_SIZE, FIELD_SIZE, FIELD_SIZE);
-			}
 				// Draw Snakes
-			for (GoodSnake snake : population.getSnakes()) {
-				if (snake.isDead()) {
+				for (GoodSnake snake : population.getSnakes()) {
+					if (snake.isDead()) {
+						g.setColor(Color.GRAY);
+					}
+					else {
+						g.setColor(Color.BLACK);
+					}
+					for (Point tail : snake.tail) {
+						g.fillRect(MARGIN + tail.x * FIELD_SIZE, MARGIN + tail.y * FIELD_SIZE, FIELD_SIZE, FIELD_SIZE);
+					}
+					
+					if (snake.isDead()) {
+						g.setColor(Color.GRAY);
+					}
+					else {
+						g.setColor(Color.GREEN);
+					}
+					g.fillRect(MARGIN + snake.head.x * FIELD_SIZE, MARGIN + snake.head.y * FIELD_SIZE, FIELD_SIZE, FIELD_SIZE);
+				}
+			}
+			else {
+				GoodSnake bestSnake = population.getBestSnake();
+				
+				// Draw Food				
+				g.setColor(Color.BLUE);
+				for (Point food : bestSnake.getFood()) {
+					g.fillRect(MARGIN + food.x * FIELD_SIZE, MARGIN + food.y * FIELD_SIZE, FIELD_SIZE, FIELD_SIZE);
+				}
+					
+				if (bestSnake.isDead()) {
 					g.setColor(Color.GRAY);
 				}
 				else {
 					g.setColor(Color.BLACK);
 				}
-				for (Point tail : snake.tail) {
+				
+				for (Point tail : bestSnake.tail) {
 					g.fillRect(MARGIN + tail.x * FIELD_SIZE, MARGIN + tail.y * FIELD_SIZE, FIELD_SIZE, FIELD_SIZE);
 				}
-				
-				if (snake.isDead()) {
+					
+				if (bestSnake.isDead()) {
 					g.setColor(Color.GRAY);
 				}
 				else {
 					g.setColor(Color.GREEN);
 				}
-				g.fillRect(MARGIN + snake.head.x * FIELD_SIZE, MARGIN + snake.head.y * FIELD_SIZE, FIELD_SIZE, FIELD_SIZE);
+				g.fillRect(MARGIN + bestSnake.head.x * FIELD_SIZE, MARGIN + bestSnake.head.y * FIELD_SIZE, FIELD_SIZE, FIELD_SIZE);
 			}
 			
 			// Draw Enemy Snake
-			g.setColor(Color.BLACK);
-			for (Point tail : enemySnake.tail) {
-				g.fillRect(MARGIN + tail.x * FIELD_SIZE, MARGIN + tail.y * FIELD_SIZE, FIELD_SIZE, FIELD_SIZE);
-			}
-				
-			g.setColor(Color.RED);
-			g.fillRect(MARGIN + enemySnake.head.x * FIELD_SIZE, MARGIN + enemySnake.head.y * FIELD_SIZE, FIELD_SIZE, FIELD_SIZE);
+//			g.setColor(Color.BLACK);
+//			for (Point tail : enemySnake.tail) {
+//				g.fillRect(MARGIN + tail.x * FIELD_SIZE, MARGIN + tail.y * FIELD_SIZE, FIELD_SIZE, FIELD_SIZE);
+//			}
+//				
+//			g.setColor(Color.RED);
+//			g.fillRect(MARGIN + enemySnake.head.x * FIELD_SIZE, MARGIN + enemySnake.head.y * FIELD_SIZE, FIELD_SIZE, FIELD_SIZE);
 						
 			// Draw Logging
 			g.setColor(Color.BLACK);
-			g.drawString(Integer.toString(population.getGenerationNo()), MARGIN, MARGIN + BOARDSIZE * FIELD_SIZE + MARGIN);
+			g.drawString("# Populations: " + Integer.toString(population.getGenerationNo()), MARGIN, MARGIN + BOARDSIZE * FIELD_SIZE + MARGIN);
+			
+			GoodSnake bestSnake = population.getBestSnake();
+			if (bestSnake != null) {
+				g.drawString("Current Best Snakes Fitness: " + Double.toString(bestSnake.getFitness()), MARGIN, MARGIN + BOARDSIZE * FIELD_SIZE + MARGIN + 20);
+				g.drawString("Current Best Snakes Length: " + Double.toString(bestSnake.tail.size() + 1), MARGIN, MARGIN + BOARDSIZE * FIELD_SIZE + MARGIN + 40);
+				g.drawString("Current Best Snakes Lifetime: " + Double.toString(bestSnake.getScore()), MARGIN, MARGIN + BOARDSIZE * FIELD_SIZE + MARGIN + 60);
+				g.drawString("Global Best Snakes Moves: " + Double.toString(population.getGlobalMostMoves()), MARGIN, MARGIN + BOARDSIZE * FIELD_SIZE + MARGIN + 80);
+				g.drawString("Global Best Snakes Fitness: " + Double.toString(population.getGlobalBestFitness()), MARGIN, MARGIN + BOARDSIZE * FIELD_SIZE + MARGIN + 100);
+				g.drawString("Global Best Snakes Length: " + Double.toString(population.getGlobalBiggestLength()), MARGIN, MARGIN + BOARDSIZE * FIELD_SIZE + MARGIN + 120);
+			}
 		}
 	}
 

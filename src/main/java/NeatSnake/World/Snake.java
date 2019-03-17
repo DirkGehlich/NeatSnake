@@ -14,6 +14,7 @@ public class Snake {
 	
 	public Point head = new Point();
 	public List<Point> tail = new ArrayList<Point>();
+	protected Point direction = new Point();
 	
 	
 	
@@ -48,7 +49,7 @@ public class Snake {
 		return false;			
 	}
 
-	private Point getNextTile(Point direction) {
+	protected Point getNextTile(Point direction) {
 		Point nextTile = new Point();
 		
 		nextTile.x = head.x + direction.x;
