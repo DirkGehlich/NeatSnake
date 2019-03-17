@@ -24,11 +24,11 @@ public class World extends JFrame implements KeyListener {
 	final int FIELD_SIZE = 50;
 	final int FRAME_WIDTH = 800;
 	final int FRAME_HEIGHT = 600;
-	final int POPULATIONSIZE = 5;
+	final int POPULATIONSIZE = 100;
+	final int MOVETIME_MS = 100;
 	
 	Snake enemySnake;
-	
-	List<Snake> snakes = new ArrayList<Snake>();
+	private Population population = new Population(POPULATIONSIZE, BOARDSIZE);
 	List<Point> food = new ArrayList<Point>();
 	
 	PlayArea playArea;
@@ -48,22 +48,17 @@ public class World extends JFrame implements KeyListener {
 		addKeyListener(this);
 		playArea = new PlayArea(BOARDSIZE, FIELD_SIZE, MARGIN);
 		add(playArea);
-		enemySnake = createEnemySnake();
-				
-		for (int i=0; i<POPULATIONSIZE; ++i) {
-			snakes.add(new Snake(new Point(1,1)));
-		}
-			
+		enemySnake = createEnemySnake();	
 	}
 	
 	private Snake createEnemySnake() {
 		Snake snake = new Snake();
+		snake.head = new Point(9, 6);
 		snake.tail.add(new Point(9, 1));
 		snake.tail.add(new Point(9, 2));
 		snake.tail.add(new Point(9, 3));
 		snake.tail.add(new Point(9, 4));
 		snake.tail.add(new Point(9, 5));
-		snake.head = new Point(9, 6);
 		
 		return snake;
 	}
@@ -71,22 +66,11 @@ public class World extends JFrame implements KeyListener {
 	
 	public void runWorld() {
 		Timer timer = new Timer(true);
-		timer.scheduleAtFixedRate(new MoveTask(this), 0, 500);
+		timer.scheduleAtFixedRate(new MoveTask(this), 0, MOVETIME_MS);
 	}
 	
 	protected void update() {
 		playArea.update();
-	}
-	
-	public void moveSnakes() {
-		for (Snake snake : snakes) {
-			if (!snake.isDead()) {
-				snake.think(BOARDSIZE, getEnemySnakesCoords(), food);
-				snake.move();
-				if (isDead(snake))
-					snake.kill();
-			}
-		}			
 	}
 	
 	private List<Point> getEnemySnakesCoords() {
@@ -97,35 +81,6 @@ public class World extends JFrame implements KeyListener {
 		snakeCoords.addAll(enemySnake.tail);
 		
 		return snakeCoords;
-	}
-	
-	private boolean isDead(Snake snake) {
-		
-		// Hit the wall
-		if (snake.head.x >= BOARDSIZE || snake.head.x < 0 ||
-			snake.head.y >= BOARDSIZE || snake.head.y < 0) {
-			return true;
-		}
-			
-		// Hit enemy snake
-		if (snake.head.equals(enemySnake.head)) {
-			return true;
-		}
-		
-		for (Point enemyTail : enemySnake.tail) {
-			if (snake.head.equals(enemyTail)) {
-				return true;
-			}
-		}
-		
-		// Hit itself
-		for (Point ownTail : snake.tail) {
-			if (snake.head.equals(ownTail)) {
-				return true;
-			}
-		}
-		
-		return false;
 	}
 	
 	public void keyReleased(KeyEvent arg0) {
@@ -143,8 +98,14 @@ public class World extends JFrame implements KeyListener {
 		
 		Point direction = getRandomDirection();
 		
-		while (enemySnake.wouldDie(direction, BOARDSIZE)) {
+		int deadlockCnt = 0;
+		while (deadlockCnt < 20 && enemySnake.wouldDie(direction, BOARDSIZE)) {
 			direction = getRandomDirection();
+			deadlockCnt++;
+		}
+		
+		if (deadlockCnt == 20) {
+			enemySnake = createEnemySnake();
 		}
 		
 		enemySnake.move(direction);
@@ -170,7 +131,9 @@ public class World extends JFrame implements KeyListener {
 		@Override
 		public void run() {
 			world.moveEnemySnakeRandomly();
-			world.moveSnakes();		
+			
+			// TODO: pass population as parameter to ctor?
+			population.moveSnakes(getEnemySnakesCoords(), food);		
 
 			world.update();
 		}
@@ -208,18 +171,16 @@ public class World extends JFrame implements KeyListener {
 					g.drawRect(MARGIN + rowIdx * fieldSize, MARGIN + colIdx * fieldSize, fieldSize, fieldSize);
 				}
 			}
-			
-			// Draw Enemy Snake
-			for (Point tail : enemySnake.tail) {
-				g.fillRect(MARGIN + tail.x * FIELD_SIZE, MARGIN + tail.y * FIELD_SIZE, FIELD_SIZE, FIELD_SIZE);
-			}
-				
-			g.setColor(Color.RED);
-			g.fillRect(MARGIN + enemySnake.head.x * FIELD_SIZE, MARGIN + enemySnake.head.y * FIELD_SIZE, FIELD_SIZE, FIELD_SIZE);
 
 			// Draw Snakes
-			for (Snake snake : snakes) {
+			for (GoodSnake snake : population.getSnakes()) {
 				
+				// Food
+				g.setColor(Color.BLUE);
+				g.fillRect(MARGIN + snake.getFood().x * FIELD_SIZE, MARGIN + snake.getFood().y * FIELD_SIZE, FIELD_SIZE, FIELD_SIZE);
+			}
+				// Draw Snakes
+			for (GoodSnake snake : population.getSnakes()) {
 				if (snake.isDead()) {
 					g.setColor(Color.GRAY);
 				}
@@ -239,9 +200,18 @@ public class World extends JFrame implements KeyListener {
 				g.fillRect(MARGIN + snake.head.x * FIELD_SIZE, MARGIN + snake.head.y * FIELD_SIZE, FIELD_SIZE, FIELD_SIZE);
 			}
 			
+			// Draw Enemy Snake
+			g.setColor(Color.BLACK);
+			for (Point tail : enemySnake.tail) {
+				g.fillRect(MARGIN + tail.x * FIELD_SIZE, MARGIN + tail.y * FIELD_SIZE, FIELD_SIZE, FIELD_SIZE);
+			}
+				
+			g.setColor(Color.RED);
+			g.fillRect(MARGIN + enemySnake.head.x * FIELD_SIZE, MARGIN + enemySnake.head.y * FIELD_SIZE, FIELD_SIZE, FIELD_SIZE);
+						
 			// Draw Logging
 			g.setColor(Color.BLACK);
-			g.drawString(logMsg, MARGIN, MARGIN + BOARDSIZE * FIELD_SIZE + MARGIN);
+			g.drawString(Integer.toString(population.getGenerationNo()), MARGIN, MARGIN + BOARDSIZE * FIELD_SIZE + MARGIN);
 		}
 	}
 
