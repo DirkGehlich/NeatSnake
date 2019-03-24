@@ -3,10 +3,6 @@ package NeatSnake.World;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
-
-import org.neuroph.core.NeuralNetwork;
-import org.neuroph.nnet.MultiLayerPerceptron;
 
 public class Snake {
 	

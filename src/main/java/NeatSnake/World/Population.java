@@ -2,19 +2,23 @@ package NeatSnake.World;
 
 import java.awt.Point;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import org.neuroph.core.NeuralNetwork;
+import org.neuroph.nnet.MultiLayerPerceptron;
+import org.neuroph.util.TransferFunctionType;
+
 public class Population {
 	
-	private final double MUTATIONRATE = 0.1;
+	double MUTATIONRATE = 0.15;
 	private final int BOARDSIZE;
 	private final int POPULATIONSIZE;
 	List<GoodSnake> snakes = new ArrayList<GoodSnake>();
 	private int generationNo = 1;
 	Random random = new Random();
 	GoodSnake bestSnake = null;
+	GoodSnake evalBestSnake = null;
 	private int globalBestFitness = 0;
 	private int globalMostMoves = 0;
 	private int globalBiggestLength = 0;
@@ -25,17 +29,28 @@ public class Population {
 		this.BOARDSIZE = boardSize;
 		this.POPULATIONSIZE = populationSize;
 		for (int i=0; i<populationSize; ++i) {
-			snakes.add(new GoodSnake(BOARDSIZE, new Point(1,1)));
+			snakes.add(new GoodSnake(BOARDSIZE, new Point(5,5)));
+		}
+	}
+	
+	public Population(String fileName, int populationSize, int boardSize) {
+		
+		MultiLayerPerceptron brain = (MultiLayerPerceptron) NeuralNetwork.createFromFile(fileName);
+		this.BOARDSIZE = boardSize;
+		this.POPULATIONSIZE = populationSize;
+		for (int i=0; i<populationSize; ++i) {
+			snakes.add(new GoodSnake(BOARDSIZE, new Point(5,5), brain));
 		}
 	}
 	
 	public void moveSnakes(List<Point> enemySnakesCoords) {
 		
 		if (!training) {
-			if (!bestSnake.isDead()) {
-				bestSnake.move();
-				if (isDead(bestSnake, enemySnakesCoords))
-					bestSnake.kill();
+			if (!evalBestSnake.isDead()) {
+				evalBestSnake.think(BOARDSIZE, enemySnakesCoords);
+				evalBestSnake.move();
+				if (isDead(evalBestSnake, enemySnakesCoords))
+					evalBestSnake.kill();
 			}
 		}
 		else {
@@ -96,6 +111,18 @@ public class Population {
 				
 		setBestSnake();
 		
+		int bestFitness = bestSnake.getFitness();
+		if (bestFitness < 1000) 
+			MUTATIONRATE = 0.2;
+		if (bestFitness > 2000) 
+			MUTATIONRATE = 0.1;
+		if (bestFitness > 5000) 
+			MUTATIONRATE = 0.05;
+		if (bestFitness > 10000) 
+			MUTATIONRATE = 0.02;
+		if (bestFitness > 100000) 
+			MUTATIONRATE = 0.01;
+		
 		GoodSnake bestSnake = this.bestSnake.copy();
 		newGeneration.add(bestSnake);
 		
@@ -112,8 +139,13 @@ public class Population {
 		snakes.addAll(newGeneration);	
 		
 		generationNo++;
+
 	}
-	
+
+	public GoodSnake getDemonstrationSnake() {
+		return evalBestSnake;
+	}
+
 	public GoodSnake getBestSnake() {
 		return bestSnake;
 	}
@@ -147,6 +179,7 @@ public class Population {
 		}
 		
 		this.bestSnake = bestSnake;
+		this.evalBestSnake = bestSnake.copy();
 		
 		if (bestSnake.getFitness() > globalBestFitness) {
 			globalBestFitness = bestSnake.getFitness();
