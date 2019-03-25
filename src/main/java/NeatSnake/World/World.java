@@ -1,6 +1,7 @@
 package NeatSnake.World;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
@@ -8,12 +9,21 @@ import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ThreadLocalRandom;
 
+import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 
 
 public class World extends JFrame implements KeyListener {
@@ -28,7 +38,7 @@ public class World extends JFrame implements KeyListener {
 	final int FRAME_WIDTH = 800;
 	final int FRAME_HEIGHT = 600;
 	final int POPULATIONSIZE = 200;
-	final int MOVETIME_MS = 100;
+	final int MOVETIME_MS = 25;
 	
 	boolean worldRunning = false;
 	
@@ -37,7 +47,12 @@ public class World extends JFrame implements KeyListener {
 	private Population population = null;
 	
 	PlayArea playArea;
+	JPanel container = new JPanel();
 	
+	private JFreeChart chart = null;
+	private XYSeries seriesLifetime = null;
+	private XYSeries seriesSnakeLength = null;
+		
 	public static void main(String[] args) {
 		World world = new World();
 		world.setVisible(true);
@@ -46,13 +61,33 @@ public class World extends JFrame implements KeyListener {
 	
 	public World() {
 		int playAreaSize = BOARDSIZE * FIELD_SIZE + MARGIN;
-		setSize(playAreaSize + 500, playAreaSize + 250);
+		setSize(playAreaSize + 1000, playAreaSize + 250);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setFocusable(true);
 		addKeyListener(this);
+		
+		
+		container.setLayout(new BoxLayout(container, BoxLayout.X_AXIS));
 		playArea = new PlayArea(BOARDSIZE, FIELD_SIZE, MARGIN);
-		add(playArea);
+		container.add(playArea);
+		
+		seriesLifetime = new XYSeries("# Moves");
+		seriesSnakeLength = new XYSeries("Snake length");
+//		series.add(1.0, 400);
+//		series.add(2.0, 200);
+		
+		final XYSeriesCollection data = new XYSeriesCollection(seriesLifetime);
+		data.addSeries(seriesSnakeLength);
+		
+		chart = ChartFactory.createXYLineChart("Highest Number moves per generation", "Generation", "# Moves", data, PlotOrientation.VERTICAL, true, true, false);
+
+		final ChartPanel chartPanel = new ChartPanel(chart);
+		chartPanel.setPreferredSize(new Dimension(900, 500));
+		chartPanel.setMaximumSize(new Dimension(900, 500));
+		
+		container.add(chartPanel);
+		add(container);
 		enemySnake = createEnemySnake();	
 	}
 	
@@ -117,8 +152,6 @@ public class World extends JFrame implements KeyListener {
 	}
 	
 	public void moveEnemySnakeRandomly() {
-		playArea.logMsg = "";
-		
 		Point direction = getRandomDirection();
 		
 		int deadlockCnt = 0;
@@ -132,7 +165,6 @@ public class World extends JFrame implements KeyListener {
 		}
 		
 		enemySnake.move(direction);
-		playArea.logMsg += "Direction: x=" + direction.x + " - y=" + direction.y; 
 		
 	}
 	
@@ -287,6 +319,16 @@ public class World extends JFrame implements KeyListener {
 				g.drawString("Global Best Snakes Moves: " + Double.toString(population.getGlobalMostMoves()), MARGIN, MARGIN + BOARDSIZE * FIELD_SIZE + MARGIN + 80);
 				g.drawString("Global Best Snakes Fitness: " + Double.toString(population.getGlobalBestFitness()), MARGIN, MARGIN + BOARDSIZE * FIELD_SIZE + MARGIN + 100);
 				g.drawString("Global Best Snakes Length: " + Double.toString(population.getGlobalBiggestLength()), MARGIN, MARGIN + BOARDSIZE * FIELD_SIZE + MARGIN + 120);
+			}
+			
+			if (bestSnake != null) {
+				if (population.getLifetimeHistory().size() > seriesLifetime.getItemCount()) {
+					seriesLifetime.add(seriesLifetime.getItemCount() + 1, population.getLifetimeHistory().get(population.getLifetimeHistory().size()-1));
+				}
+				
+				if (population.getSnakeLengthHistory().size() > seriesSnakeLength.getItemCount()) {
+					seriesSnakeLength.add(seriesSnakeLength.getItemCount() + 1, population.getSnakeLengthHistory().get(population.getSnakeLengthHistory().size()-1));
+				}
 			}
 		}
 	}

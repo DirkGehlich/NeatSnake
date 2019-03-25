@@ -26,7 +26,13 @@
             <groupId>org.neuroph</groupId>
             <artifactId>neuroph-core</artifactId>
             <version>2.94</version>
-        </dependency>
+    </dependency>
+		<!-- https://mvnrepository.com/artifact/org.jfree/jfreechart -->
+	<dependency>
+		<groupId>org.jfree</groupId>
+		<artifactId>jfreechart</artifactId>
+		<version>1.0.14</version>
+	</dependency>
   </dependencies>
   <build>
   <plugins>
@@ -45,8 +51,25 @@
             <artifactId>junit-jupiter-engine</artifactId>
             <version>5.2.0-M1</version>
         </dependency>
+		
+
     </dependencies>
 </plugin>
+	<plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.6.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>java</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <mainClass>NeatSnake.World.World</mainClass>
+        </configuration>
+    </plugin>
 </plugins>
 </build>
 </project>

@@ -24,6 +24,9 @@ public class Population {
 	private int globalBiggestLength = 0;
 	private boolean training = true;
 	
+	private List<Integer> lifetimeHistory = new ArrayList<Integer>();
+	private List<Integer> tailLengthHistory = new ArrayList<Integer>();
+	
 	public Population(int populationSize, int boardSize) {
 		
 		this.BOARDSIZE = boardSize;
@@ -111,6 +114,7 @@ public class Population {
 				
 		setBestSnake();
 		
+		
 		int bestFitness = bestSnake.getFitness();
 		if (bestFitness < 1000) 
 			MUTATIONRATE = 0.2;
@@ -177,6 +181,15 @@ public class Population {
 				bestSnake = snake;
 			}
 		}
+		
+		if (bestSnake.getScore() < 100) {
+			@SuppressWarnings("unused")
+			boolean foobar = true;
+		}
+		
+		// TODO: move to better location
+		lifetimeHistory.add(bestSnake.getScore());
+		tailLengthHistory.add(bestSnake.tail.size() + 1);
 		
 		this.bestSnake = bestSnake;
 		this.evalBestSnake = bestSnake.copy();
@@ -254,5 +267,15 @@ public class Population {
 	public void setTraining(boolean training) {
 		this.training = training;
 	}
+
+	public List<Integer> getLifetimeHistory() {
+		return lifetimeHistory;
+	}
+
+	public List<Integer> getSnakeLengthHistory() {
+		return tailLengthHistory;
+	}
+	
+	
 
 }
