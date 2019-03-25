@@ -2,8 +2,9 @@
 
 Implementing NEAT algorithm to play snake.
 
-Use l to load saved file
-Use s to save NN of best snake to file
-Use Enter to run the world
-Use Esc to exit (without saving)
-Use Space to show best snake (without learning) (not really working yet)
+# Usage
+* l: load saved NN from file
+* s: Save NN of best snake to file
+* <Enter>: Run the world (if no NN loaded from file, a new population with random weights will be created)
+* <Esc>: Exit (without saving)
+* <Space>: Show only best snake (without learning) (not really working yet)
