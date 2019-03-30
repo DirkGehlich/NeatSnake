@@ -10,7 +10,7 @@ import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 public class GameServer {
 	public static void main( String[] args ) throws IOException, InterruptedException 
 	   {
-	      String baseUrl = ( args.length > 0 ) ? args[0] : "http://localhost:4434";
+	      String baseUrl = ( args.length > 0 ) ? args[0] : "http://localhost:8080";
 
 	      final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(
 	            URI.create( baseUrl ), new ResourceConfig( GameService.class ), false );
