@@ -120,7 +120,7 @@
 		
 
     </dependencies>
-</plugin>
+	</plugin>
 	<plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
@@ -136,6 +136,32 @@
           <mainClass>server.GameServer</mainClass>
         </configuration>
     </plugin>
+	<plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-assembly-plugin</artifactId>
+		<executions>
+			<execution>
+				<phase>package</phase>
+				<goals>
+					<goal>single</goal>
+				</goals>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>
+								server.GameServer
+							</mainClass>
+						</manifest>
+					</archive>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+					<finalName>neatsnake</finalName>
+					<appendAssemblyId>false</appendAssemblyId>
+				</configuration>
+			</execution>
+		</executions>
+	</plugin>
 </plugins>
 </build>
 </project>
