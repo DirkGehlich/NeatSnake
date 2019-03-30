@@ -12,7 +12,7 @@
             <id>neuroph.sourceforge.net</id>
             <url>http://neuroph.sourceforge.net/maven2/</url>
         </repository>        
-</repositories>
+	</repositories>
   <dependencies>
     <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
 	<dependency>
@@ -97,71 +97,72 @@
 	  <groupId>org.glassfish.jersey.media</groupId>
 	  <artifactId>jersey-media-json-jackson</artifactId>
 	  <version>2.25</version>
-	</dependency>
-		
+	</dependency>		
   </dependencies>
+  
   <build>
-  <plugins>
-  <plugin>
-    <groupId>org.apache.maven.plugins</groupId>
-    <artifactId>maven-surefire-plugin</artifactId>
-    <version>2.21.0</version>
-    <dependencies>
-        <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-surefire-provider</artifactId>
-            <version>1.2.0-M1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.2.0-M1</version>
-        </dependency>
-		
+	<plugins>
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-surefire-plugin</artifactId>
+			<version>2.21.0</version>
+			<dependencies>
+				<dependency>
+					<groupId>org.junit.platform</groupId>
+					<artifactId>junit-platform-surefire-provider</artifactId>
+					<version>1.2.0-M1</version>
+				</dependency>
+				<dependency>
+					<groupId>org.junit.jupiter</groupId>
+					<artifactId>junit-jupiter-engine</artifactId>
+					<version>5.2.0-M1</version>
+				</dependency>
+				
 
-    </dependencies>
-	</plugin>
-	<plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.6.0</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>java</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <mainClass>server.GameServer</mainClass>
-        </configuration>
-    </plugin>
-	<plugin>
-		<groupId>org.apache.maven.plugins</groupId>
-		<artifactId>maven-assembly-plugin</artifactId>
-		<executions>
-			<execution>
-				<phase>package</phase>
+			</dependencies>
+		</plugin>
+		<plugin>
+			<groupId>org.codehaus.mojo</groupId>
+			<artifactId>exec-maven-plugin</artifactId>
+			<version>1.6.0</version>
+			<executions>
+			  <execution>
 				<goals>
-					<goal>single</goal>
+				  <goal>java</goal>
 				</goals>
-				<configuration>
-					<archive>
-						<manifest>
-							<mainClass>
-								server.GameServer
-							</mainClass>
-						</manifest>
-					</archive>
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
-					<finalName>neatsnake</finalName>
-					<appendAssemblyId>false</appendAssemblyId>
-				</configuration>
-			</execution>
-		</executions>
-	</plugin>
-</plugins>
+			  </execution>
+			</executions>
+			<configuration>
+			  <mainClass>server.GameServer</mainClass>
+			</configuration>
+		</plugin>
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-assembly-plugin</artifactId>
+			<executions>
+				<execution>
+					<phase>package</phase>
+					<goals>
+						<goal>single</goal>
+					</goals>
+					<configuration>
+						<archive>
+							<manifest>
+								<mainClass>
+									server.GameServer
+								</mainClass>
+							</manifest>
+						</archive>
+						<descriptorRefs>
+							<descriptorRef>jar-with-dependencies</descriptorRef>
+						</descriptorRefs>
+						<finalName>NeatSnake</finalName>
+						<appendAssemblyId>false</appendAssemblyId>
+						<attach>false</attach>
+					</configuration>
+				</execution>
+			</executions>
+		</plugin>
+	</plugins>
 </build>
 </project>
