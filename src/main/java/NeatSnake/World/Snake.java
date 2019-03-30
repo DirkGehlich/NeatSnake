@@ -69,4 +69,14 @@ public class Snake {
 		head.x += direction.x;
 		head.y += direction.y;	
 	}
+
+	public Point getDirection() {
+		return direction;
+	}
+
+	public void setHead(Point head) {
+		this.head = head;
+	}
+	
+	
 }

@@ -3,6 +3,8 @@ package NeatSnake;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.awt.Point;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -50,11 +52,14 @@ class SnakeTest {
 		int boardSize = 10;		
 		Point direction = new Point(1,0);
 		
-		GoodSnake snake = new GoodSnake(boardSize, startingPosition);
+		List<Point> tail = new ArrayList<Point>();
+		tail.add(new Point(1,2));
+		tail.add(new Point(1,3));
+		tail.add(new Point(1,4));
 		
-		snake.tail.add(new Point(1,2));
-		snake.tail.add(new Point(1,3));
-		snake.tail.add(new Point(1,4));
+		GoodSnake snake = new GoodSnake(boardSize, startingPosition, tail);
+		
+		
 		
 		snake.move();
 		snake.move();

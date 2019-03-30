@@ -23,6 +23,8 @@ public class Population {
 	private int globalMostMoves = 0;
 	private int globalBiggestLength = 0;
 	private boolean training = true;
+	private int localMostMoves = 0;
+	private int localBiggestLength = 0;
 	
 	private List<Integer> lifetimeHistory = new ArrayList<Integer>();
 	private List<Integer> tailLengthHistory = new ArrayList<Integer>();
@@ -32,7 +34,12 @@ public class Population {
 		this.BOARDSIZE = boardSize;
 		this.POPULATIONSIZE = populationSize;
 		for (int i=0; i<populationSize; ++i) {
-			snakes.add(new GoodSnake(BOARDSIZE, new Point(5,5)));
+			List<Point> tail = new ArrayList<Point>();
+			tail.add(new Point(5,4));
+
+			GoodSnake snake = new GoodSnake(BOARDSIZE, new Point(5,5), tail);
+			snake.generateFood();
+			snakes.add(snake);
 		}
 	}
 	
@@ -42,34 +49,35 @@ public class Population {
 		this.BOARDSIZE = boardSize;
 		this.POPULATIONSIZE = populationSize;
 		for (int i=0; i<populationSize; ++i) {
-			snakes.add(new GoodSnake(BOARDSIZE, new Point(5,5), brain));
+			List<Point> tail = new ArrayList<Point>();
+			tail.add(new Point(5,4));
+			GoodSnake snake = new GoodSnake(BOARDSIZE, new Point(5,5), tail, brain);
+			snake.generateFood();
+			snakes.add(snake);
 		}
 	}
 	
-	public void moveSnakes(List<Point> enemySnakesCoords) {
+	public boolean isPopulationDead() {
+	
+		if (snakes.size() <= 0)
+			return true;
 		
-		if (!training) {
-			if (!evalBestSnake.isDead()) {
-				evalBestSnake.think(BOARDSIZE, enemySnakesCoords);
-				evalBestSnake.move();
-				if (isDead(evalBestSnake, enemySnakesCoords))
-					evalBestSnake.kill();
+		for (GoodSnake snake : snakes) {
+			if (!snake.isDead()) {
+				return false;
 			}
-		}
-		else {
-			boolean allSnakesDead = true;
-			for (GoodSnake snake : snakes) {
-				if (!snake.isDead()) {
-					allSnakesDead = false;
-					snake.think(BOARDSIZE, enemySnakesCoords);
-					snake.move();
-					if (isDead(snake, enemySnakesCoords))
-						snake.kill();
-				}
-			}			
-			
-			if (allSnakesDead) {			
-				createNewGeneration();
+		}			
+		
+		return true;
+	}
+	
+	public void moveSnakes(List<Point> enemySnakesCoords) {
+		for (GoodSnake snake : snakes) {
+			if (!snake.isDead()) {
+				snake.think(BOARDSIZE, enemySnakesCoords);
+				snake.move();
+				if (isDead(snake, enemySnakesCoords))
+					snake.kill();
 			}
 		}
 	}
@@ -116,26 +124,28 @@ public class Population {
 		
 		
 		int bestFitness = bestSnake.getFitness();
-		if (bestFitness < 1000) 
+		if (bestFitness < 10000) 
 			MUTATIONRATE = 0.2;
-		if (bestFitness > 2000) 
+		if (bestFitness > 20000) 
 			MUTATIONRATE = 0.1;
-		if (bestFitness > 5000) 
+		if (bestFitness > 50000) 
 			MUTATIONRATE = 0.05;
-		if (bestFitness > 10000) 
-			MUTATIONRATE = 0.02;
 		if (bestFitness > 100000) 
+			MUTATIONRATE = 0.02;
+		if (bestFitness > 1000000) 
 			MUTATIONRATE = 0.01;
-		
+				
 		GoodSnake bestSnake = this.bestSnake.copy();
+		bestSnake.generateFood();
 		newGeneration.add(bestSnake);
 		
 		for (int i=1; i<POPULATIONSIZE; ++i) {
 			
-			GoodSnake parent1 = selectParent().copy();
-			GoodSnake parent2 = selectParent().copy();
+			GoodSnake parent1 = selectParent();
+			GoodSnake parent2 = selectParent();
 			GoodSnake child = crossover(parent1, parent2);
 			child.mutate(MUTATIONRATE);
+			child.generateFood();
 			newGeneration.add(child);
 		}
 					
@@ -174,12 +184,20 @@ public class Population {
 		
 		double fitness = 0;
 		GoodSnake bestSnake = null;
+		localBiggestLength = 0;
+		localMostMoves = 0;
 		
 		for (GoodSnake snake : snakes) {
 			if (snake.getFitness() > fitness) {
 				fitness = snake.getFitness();
 				bestSnake = snake;
 			}
+			
+			if (snake.getScore() > localMostMoves)
+				localMostMoves = snake.getScore();
+			
+			if (snake.tail.size() + 1 > localBiggestLength)
+				localBiggestLength = snake.tail.size() + 1;
 		}
 		
 		if (bestSnake.getScore() < 100) {
@@ -198,12 +216,12 @@ public class Population {
 			globalBestFitness = bestSnake.getFitness();
 		}
 		
-		if (bestSnake.getScore() > globalMostMoves) {
-			globalMostMoves = bestSnake.getScore();
+		if (localMostMoves > globalMostMoves) {
+			globalMostMoves = localMostMoves;
 		}
 
-		if (bestSnake.tail.size() + 1 > globalBiggestLength) {
-			globalBiggestLength = bestSnake.tail.size() + 1;
+		if (localBiggestLength > globalBiggestLength) {
+			globalBiggestLength = localBiggestLength;
 		}
 	}
 	
@@ -216,7 +234,6 @@ public class Population {
 	
 	private GoodSnake selectParent() {
 		
-		// TODO: int or double? 
 		int fitnessSum = 0;
 		
 		for (GoodSnake snake : snakes) {
@@ -274,6 +291,14 @@ public class Population {
 
 	public List<Integer> getSnakeLengthHistory() {
 		return tailLengthHistory;
+	}
+
+	public int getLocalMostMoves() {
+		return localMostMoves;
+	}
+
+	public int getLocalBiggestLength() {
+		return localBiggestLength;
 	}
 	
 	

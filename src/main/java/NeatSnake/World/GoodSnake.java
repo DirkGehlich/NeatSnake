@@ -24,26 +24,24 @@ public class GoodSnake extends Snake {
 	private int fitness = 0;
 	private int lifetime = 0;
 
-	private double[] inputs = new double[24];
+	private double[] inputs = new double[25];
 	
 	Random random = new Random();
 	
 	public GoodSnake(int boardSize) {
 		this.BOARDSIZE = boardSize;
-		brain = new MultiLayerPerceptron(TransferFunctionType.SIGMOID, 24, 18, 4);
+		brain = new MultiLayerPerceptron(TransferFunctionType.SIGMOID, 25, 18, 4);
 		brain.setNetworkType(NeuralNetworkType.MULTI_LAYER_PERCEPTRON);
 		brain.randomizeWeights(-1.0, 1.0);
-		
-		generateFood();
 	}
 	
-	public GoodSnake(int boardSize, Point startingPosition, MultiLayerPerceptron brain) {
+	public GoodSnake(int boardSize, Point startingPosition, List<Point> tail, MultiLayerPerceptron brain) {
 		this.BOARDSIZE = boardSize;
 		this.startingPosition = startingPosition;
 		head.x = startingPosition.x;
 		head.y = startingPosition.y;
-		this.brain = new MultiLayerPerceptron(TransferFunctionType.SIGMOID, 24, 18, 4);
-		
+		this.brain = new MultiLayerPerceptron(TransferFunctionType.SIGMOID, 25, 18, 4);
+		this.tail.addAll(tail);
 		Double[] parentWeights = brain.getWeights();
 		double[] weights = new double[parentWeights.length];
 		
@@ -51,22 +49,9 @@ public class GoodSnake extends Snake {
 			weights[i] = parentWeights[i];
 		}
 		this.brain.setWeights(weights);
-		
-//		this.brain = new MultiLayerPerceptron(TransferFunctionType.SIGMOID, 24, 18, 4);
-//		this.brain.setInputNeurons(brain.getInputNeurons());
-		
-//		Double[] parentWeights = brain.getWeights();
-//		double[] weights = new double[brain.getWeights().length];
-//		for (int i=0; i<parentWeights.length; ++i) {
-//			weights[i] = parentWeights[i];
-//		}
-//		
-//		this.brain.setWeights(weights);
-		
-		generateFood();
 	}	
 	
-	public GoodSnake(int boardSize, Point startingPosition) {
+	public GoodSnake(int boardSize, Point startingPosition, List<Point> tail) {
 		
 		this(boardSize);
 		
@@ -74,17 +59,21 @@ public class GoodSnake extends Snake {
 		this.startingPosition.y = startingPosition.y;
 		head.x = startingPosition.x;
 		head.y = startingPosition.y;
-		
-		generateFood();
+		this.tail.addAll(tail);
 	}
 	
 	public GoodSnake copy() {
-		GoodSnake snake = new GoodSnake(BOARDSIZE, startingPosition, brain);
+		
+		// TODO: put somewhere else
+		List<Point> tail = new ArrayList<Point>();
+		tail.add(new Point(5, 4));
+		
+		GoodSnake snake = new GoodSnake(BOARDSIZE, startingPosition, tail, brain);
 		
 		return snake;
 	}
 	
-	private void generateFood() {
+	public void generateFood() {
 
 		food.clear();
 		for (int i=0; i<MAXFOOD; ++i) {
@@ -120,8 +109,8 @@ public class GoodSnake extends Snake {
 		double nearestFood = 0.0;
 		int nearestFoodIdx = -1;
 		
-		for (int i=0; i<inputs.length; i += 3) {
-			if (inputs[i] >= nearestFood) {
+		for (int i=0; i<inputs.length-1; i += 3) {
+			if (inputs[i+2] < 1.0 && inputs[i] >= nearestFood) {
 				nearestFood = inputs[i];
 				nearestFoodIdx = i;
 			}
@@ -148,25 +137,28 @@ public class GoodSnake extends Snake {
 		// Idea could be to not only take shortest one, but area with most food, so that when one gets stealen by an enemy, we are still in an area of food
 		
 		Point tmpPos = (Point)head.clone();
-		double distanceBefore = 1000.0;
-		for (Point f : food) {
-			double distanceToFood = tmpPos.distance(f);
-			if (distanceToFood < distanceBefore)
-				distanceBefore = distanceToFood;
-		}
-		
 		tmpPos.x += direction.x;
 		tmpPos.y += direction.y;
 		
-		double distanceAfter = 1000.0;
-		for (Point f : food) {
-			double distanceToFood = tmpPos.distance(f);
-			if (distanceToFood < distanceAfter)
-				distanceAfter = distanceToFood;
-		}
-		
-		if (distanceAfter < distanceBefore && distanceAfter != 1000.0) {
-			info[0] = (distanceBefore - distanceAfter);
+		if (tmpPos.x >= 0 && tmpPos.y >= 0) {
+			double distanceBefore = 1000.0;
+			for (Point f : food) {
+				double distanceToFood = head.distance(f);
+				if (distanceToFood < distanceBefore)
+					distanceBefore = distanceToFood;
+			}
+			
+			
+			double distanceAfter = 1000.0;
+			for (Point f : food) {
+				double distanceToFood = tmpPos.distance(f);
+				if (distanceToFood < distanceAfter)
+					distanceAfter = distanceToFood;
+			}
+			
+			if (distanceAfter < distanceBefore && distanceAfter != 1000.0) {
+				info[0] = (distanceBefore - distanceAfter);
+			}
 		}
 		
 		do {	
@@ -178,6 +170,11 @@ public class GoodSnake extends Snake {
 //					foodFound = true;
 //					info[0] = 1.0;
 //				}
+				
+				if (!snakeFound && tail.contains(currentPos)) {
+					snakeFound = true;
+					info[1] = 1.0/distance;
+				}
 				
 				if (!snakeFound && snakes.contains(currentPos)) {
 					snakeFound = true;
@@ -267,6 +264,8 @@ public class GoodSnake extends Snake {
 		inputs[21] = info[0];
 		inputs[22] = info[1];
 		inputs[23] = info[2];
+		
+		inputs[24] = (double)health / MAXHEALTH;
 	}
 	
 	public void think(int boardSize, List<Point> snakes) {
@@ -337,7 +336,12 @@ public class GoodSnake extends Snake {
 			generateNewFood(getNextTile(direction));
 		}
 		
-		move(direction);
+		if (wouldDie(direction, BOARDSIZE)) {
+			kill();
+		}
+		else {
+			move(direction);
+		}
 	}
 	
 	public void kill() {
@@ -365,12 +369,15 @@ public class GoodSnake extends Snake {
 		
 		// Try to help the snake learn that eating is healthy
 		
-		fitness = (int)Math.floor(lifetime * Math.pow(tail.size() + 1, 2));
-//		if (tail.size() < 10) {
-//			fitness = (int)Math.floor(score * score  * Math.pow(2, 1 + tail.size()));
+		fitness = (int)Math.floor(Math.pow(lifetime, 2));
+//		fitness = (int)Math.floor(Math.pow(lifetime, 2) * (tail.size() + 1));
+//		fitness = (int)Math.floor(lifetime * lifetime * Math.pow(tail.size() + 1, 2));
+//		if (tail.size() < 5) {
+//			fitness = (int)Math.floor(lifetime  * Math.pow(2, 1 + tail.size()));
+//			fitness = (int)Math.floor(lifetime * Math.pow(tail.size() + 1, 2));
 //		}
 //		else {
-//			fitness = (int)Math.floor(score * score);
+//			fitness = (int)Math.floor(lifetime * lifetime);
 //		}
 //		fitness = (int)Math.floor(score * score  * Math.pow(2, 1 + tail.size()));
 	}
@@ -388,6 +395,7 @@ public class GoodSnake extends Snake {
 			if (mutateRnd < mutationRate) {
 				double offset = random.nextGaussian() / 5.0;
 				weight += offset;
+//				weight = random.nextGaussian();
 				if (weight > 1.0)
 					weight = 1.0;
 				if (weight < -1.0)
@@ -398,4 +406,14 @@ public class GoodSnake extends Snake {
 		
 		brain.setWeights(adjustedWeights);
 	}
+
+	public void setFood(List<Point> food) {
+		this.food = food;
+	}
+
+	public void setHealth(int health) {
+		this.health = health;
+	}
+	
+	
 }

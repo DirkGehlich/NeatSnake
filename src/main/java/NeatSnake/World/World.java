@@ -37,8 +37,8 @@ public class World extends JFrame implements KeyListener {
 	final int FIELD_SIZE = 50;
 	final int FRAME_WIDTH = 800;
 	final int FRAME_HEIGHT = 600;
-	final int POPULATIONSIZE = 200;
-	final int MOVETIME_MS = 25;
+	final int POPULATIONSIZE = 500;
+	final int MOVETIME_MS = 100;
 	
 	boolean worldRunning = false;
 	
@@ -88,19 +88,17 @@ public class World extends JFrame implements KeyListener {
 		
 		container.add(chartPanel);
 		add(container);
-		enemySnake = createEnemySnake();	
+		createEnemySnake();	
 	}
 	
-	private Snake createEnemySnake() {
-		Snake snake = new Snake();
-		snake.head = new Point(9, 6);
-		snake.tail.add(new Point(9, 1));
-		snake.tail.add(new Point(9, 2));
-		snake.tail.add(new Point(9, 3));
-		snake.tail.add(new Point(9, 4));
-		snake.tail.add(new Point(9, 5));
-		
-		return snake;
+	private void createEnemySnake() {
+		enemySnake = new Snake();
+		enemySnake.head = new Point(9, 6);
+		enemySnake.tail.add(new Point(9, 1));
+		enemySnake.tail.add(new Point(9, 2));
+		enemySnake.tail.add(new Point(9, 3));
+		enemySnake.tail.add(new Point(9, 4));
+		enemySnake.tail.add(new Point(9, 5));
 	}
 	
 	
@@ -161,7 +159,7 @@ public class World extends JFrame implements KeyListener {
 		}
 		
 		if (deadlockCnt == 20) {
-			enemySnake = createEnemySnake();
+			createEnemySnake();
 		}
 		
 		enemySnake.move(direction);
@@ -188,7 +186,13 @@ public class World extends JFrame implements KeyListener {
 			world.moveEnemySnakeRandomly();
 			
 			// TODO: pass population as parameter to ctor?
-			population.moveSnakes(getEnemySnakesCoords());		
+			if (population.isPopulationDead()) {
+				population.createNewGeneration();
+				createEnemySnake();
+			}
+			else {
+				population.moveSnakes(getEnemySnakesCoords());
+			}						
 
 			world.update();
 		}
@@ -237,14 +241,18 @@ public class World extends JFrame implements KeyListener {
 				
 			if (population.isTraining()) {
 				// Draw Food
-	//			for (GoodSnake snake : population.getSnakes()) {
-	//				
-	//				// Food
-	//				g.setColor(Color.BLUE);
-	//				for (Point food : snake.getFood()) {
-	//					g.fillRect(MARGIN + food.x * FIELD_SIZE, MARGIN + food.y * FIELD_SIZE, FIELD_SIZE, FIELD_SIZE);
-	//				}
-	//			}
+//				for (GoodSnake snake : population.getSnakes()) {
+//					
+//					// Food
+//					if (!snake.isDead() ) {
+//						g.setColor(Color.BLUE);
+//						for (Point food : snake.getFood()) {
+//							g.fillRect(MARGIN + food.x * FIELD_SIZE, MARGIN + food.y * FIELD_SIZE, FIELD_SIZE, FIELD_SIZE);
+//						}
+//						
+////						break;
+//					}
+//				}
 				
 				// Draw Snakes
 				for (GoodSnake snake : population.getSnakes()) {
@@ -266,6 +274,8 @@ public class World extends JFrame implements KeyListener {
 							g.setColor(Color.GREEN);
 						}
 						g.fillRect(MARGIN + snake.head.x * FIELD_SIZE, MARGIN + snake.head.y * FIELD_SIZE, FIELD_SIZE, FIELD_SIZE);
+						
+//						break;
 					}
 				}
 			}
@@ -314,10 +324,10 @@ public class World extends JFrame implements KeyListener {
 			GoodSnake bestSnake = population.getBestSnake();
 			if (bestSnake != null) {
 				g.drawString("Current Best Snakes Fitness: " + Double.toString(bestSnake.getFitness()), MARGIN, MARGIN + BOARDSIZE * FIELD_SIZE + MARGIN + 20);
-				g.drawString("Current Best Snakes Length: " + Double.toString(bestSnake.tail.size() + 1), MARGIN, MARGIN + BOARDSIZE * FIELD_SIZE + MARGIN + 40);
-				g.drawString("Current Best Snakes Lifetime: " + Double.toString(bestSnake.getScore()), MARGIN, MARGIN + BOARDSIZE * FIELD_SIZE + MARGIN + 60);
-				g.drawString("Global Best Snakes Moves: " + Double.toString(population.getGlobalMostMoves()), MARGIN, MARGIN + BOARDSIZE * FIELD_SIZE + MARGIN + 80);
-				g.drawString("Global Best Snakes Fitness: " + Double.toString(population.getGlobalBestFitness()), MARGIN, MARGIN + BOARDSIZE * FIELD_SIZE + MARGIN + 100);
+				g.drawString("Current Best Snakes Lifetime: " + Double.toString(population.getLocalMostMoves()), MARGIN, MARGIN + BOARDSIZE * FIELD_SIZE + MARGIN + 40);
+				g.drawString("Current Best Snakes Length: " + Double.toString(population.getLocalBiggestLength()), MARGIN, MARGIN + BOARDSIZE * FIELD_SIZE + MARGIN + 60);
+				g.drawString("Global Best Snakes Fitness: " + Double.toString(population.getGlobalBestFitness()), MARGIN, MARGIN + BOARDSIZE * FIELD_SIZE + MARGIN + 80);
+				g.drawString("Global Best Snakes Lifetime: " + Double.toString(population.getGlobalMostMoves()), MARGIN, MARGIN + BOARDSIZE * FIELD_SIZE + MARGIN + 100);
 				g.drawString("Global Best Snakes Length: " + Double.toString(population.getGlobalBiggestLength()), MARGIN, MARGIN + BOARDSIZE * FIELD_SIZE + MARGIN + 120);
 			}
 			
