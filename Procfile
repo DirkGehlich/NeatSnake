@@ -1,1 +1,1 @@
-web: java -jar target/NeatSnake-1.0-SNAPSHOT.ja
+web: java -jar target/NeatSnake-1.0-SNAPSHOT.jar
