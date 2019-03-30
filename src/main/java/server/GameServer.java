@@ -10,15 +10,15 @@ import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 public class GameServer {
 	public static void main( String[] args ) throws IOException, InterruptedException 
 	   {
-		 	String port = System.getProperty("PORT");
+		 	String port = System.getenv("PORT");
 	        if (port != null) {
 	        	System.out.println("Found system provided port: " + port);
 	        } else {
-	        	System.out.println("Using default port: " + port);
 	            port = "8080";
+	        	System.out.println("Using default port: " + port);
 	        }
 	        
-	      String baseUrl = ( args.length > 0 ) ? args[0] : "http://localhost:" + port;
+	      String baseUrl = ( args.length > 0 ) ? args[0] : "http://0.0.0.0:" + port;
 
 	      final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(
 	            URI.create( baseUrl ), new ResourceConfig( GameService.class ), false );
