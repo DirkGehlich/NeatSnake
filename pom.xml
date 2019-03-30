@@ -133,7 +133,7 @@
           </execution>
         </executions>
         <configuration>
-          <mainClass>NeatSnake.World.World</mainClass>
+          <mainClass>server.GameServer</mainClass>
         </configuration>
     </plugin>
 </plugins>

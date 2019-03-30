@@ -45,28 +45,28 @@ class SnakeTest {
 //		assertEquals(0, snake.tail.size());
 //	}
 	
-	@Test
-	void calculateFitness() {
-		
-		Point startingPosition = new Point(1,1);
-		int boardSize = 10;		
-		Point direction = new Point(1,0);
-		
-		List<Point> tail = new ArrayList<Point>();
-		tail.add(new Point(1,2));
-		tail.add(new Point(1,3));
-		tail.add(new Point(1,4));
-		
-		GoodSnake snake = new GoodSnake(boardSize, startingPosition, tail);
-		
-		
-		
-		snake.move();
-		snake.move();
-		snake.calculateFitness();
-		
-		assertEquals(256.0, snake.getFitness());
-	}
+//	@Test
+//	void calculateFitness() {
+//		
+//		Point startingPosition = new Point(1,1);
+//		int boardSize = 10;		
+//		Point direction = new Point(1,0);
+//		
+//		List<Point> tail = new ArrayList<Point>();
+//		tail.add(new Point(1,2));
+//		tail.add(new Point(1,3));
+//		tail.add(new Point(1,4));
+//		
+//		GoodSnake snake = new GoodSnake(boardSize, startingPosition, tail);
+//		
+//		
+//		
+//		snake.move();
+//		snake.move();
+//		snake.calculateFitness();
+//		
+//		assertEquals(256.0, snake.getFitness());
+//	}
 	
 
 }
