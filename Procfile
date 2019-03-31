@@ -1,1 +1,1 @@
-web: java -jar target/NeatSnake.jar
+web: java -DPORT=$PORT -jar target/NeatSnake.jar
