@@ -47,7 +47,7 @@ public class GameService {
         try {
         	stopWatch.start();
             String uri = req.uri();
-            LOG.debug("{} called with: {}", uri, req.body());
+            LOG.info("{} called with: {}", uri, req.body());
             Map<String, String> snakeResponse;
             switch (uri) {
                 case "/ping":
@@ -65,7 +65,7 @@ public class GameService {
                 default:
                     throw new IllegalAccessError("Strange call made to the snake: " + uri);
             }
-            LOG.debug("Responding with: {}", JSON_MAPPER.writeValueAsString(snakeResponse));
+            LOG.info("Responding with: {}", JSON_MAPPER.writeValueAsString(snakeResponse));
             stopWatch.stop();
             return snakeResponse;
         } catch (Exception e) {
