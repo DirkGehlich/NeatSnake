@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.battlesnake.logic.NeatSnake;
+import io.battlesnake.utils.StopWatch;
 import io.battlesnake.world.Board;
 import io.battlesnake.world.Field;
 import spark.Request;
@@ -27,6 +28,8 @@ public class GameService {
     private static NeatSnake snake;
 	private static MultiLayerPerceptron brain;
 	
+	private StopWatch stopWatch = new StopWatch();
+	
 	public GameService() {
 		brain = (MultiLayerPerceptron) NeuralNetwork.createFromFile("savednn.txt");
 	}
@@ -40,8 +43,9 @@ public class GameService {
      */
     Map<String, String> process(Request req, Response res) {
         try {
+        	stopWatch.start();
             String uri = req.uri();
-            LOG.info("{} called with: {}", uri, req.body());
+            LOG.debug("{} called with: {}", uri, req.body());
             Map<String, String> snakeResponse;
             switch (uri) {
                 case "/ping":
@@ -59,7 +63,8 @@ public class GameService {
                 default:
                     throw new IllegalAccessError("Strange call made to the snake: " + uri);
             }
-            LOG.info("Responding with: {}", JSON_MAPPER.writeValueAsString(snakeResponse));
+            LOG.debug("Responding with: {}", JSON_MAPPER.writeValueAsString(snakeResponse));
+            stopWatch.stop();
             return snakeResponse;
         } catch (Exception e) {
             LOG.warn("Something went wrong!", e);
