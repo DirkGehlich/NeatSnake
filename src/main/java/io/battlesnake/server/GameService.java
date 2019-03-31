@@ -32,6 +32,8 @@ public class GameService {
 	
 	public GameService() {
 		brain = (MultiLayerPerceptron) NeuralNetwork.createFromFile("savednn.txt");
+		for (double weight : brain.getWeights()) 
+			LOG.info("Weight: " + weight);
 	}
 	
 	/**
