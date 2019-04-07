@@ -1,16 +1,5 @@
 package NeatSnake;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.awt.Point;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.junit.jupiter.api.Test;
-
-import NeatSnake.World.GoodSnake;
-import NeatSnake.World.Snake;
-
 class SnakeTest {
 
 //	@Test

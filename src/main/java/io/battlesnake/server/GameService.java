@@ -30,6 +30,8 @@ public class GameService {
 	
 	private StopWatch stopWatch = new StopWatch();
 	
+	private static int cntLogging = 0;
+	
 	public GameService() {
 		brain = (MultiLayerPerceptron) NeuralNetwork.createFromFile("savednn.txt");
 		for (double weight : brain.getWeights()) 
@@ -45,9 +47,14 @@ public class GameService {
      */
     Map<String, String> process(Request req, Response res) {
         try {
-        	stopWatch.start();
+        	
+
+        	if (cntLogging < 3) 
+        		stopWatch.start();
             String uri = req.uri();
-            LOG.info("{} called with: {}", uri, req.body());
+            
+            if (cntLogging < 3)
+            	LOG.info("{} called with: {}", uri, req.body());
             Map<String, String> snakeResponse;
             switch (uri) {
                 case "/ping":
@@ -65,8 +72,13 @@ public class GameService {
                 default:
                     throw new IllegalAccessError("Strange call made to the snake: " + uri);
             }
-            LOG.info("Responding with: {}", JSON_MAPPER.writeValueAsString(snakeResponse));
-            stopWatch.stop();
+            if (cntLogging < 3)
+            	LOG.info("Responding with: {}", JSON_MAPPER.writeValueAsString(snakeResponse));
+            
+            if (cntLogging < 3)
+            	stopWatch.stop();
+            cntLogging++;
+            
             return snakeResponse;
         } catch (Exception e) {
             LOG.warn("Something went wrong!", e);
@@ -91,6 +103,11 @@ public class GameService {
      * @return a response back to the engine containing the snake setup values.
      */
     public Map<String, String> start(JsonNode startRequest) {
+    	cntLogging = 0;
+    	LOG.info("---");
+    	LOG.info("---");
+    	LOG.info("---");
+    	
         snake = new NeatSnake(ObjectCreator.createSnake(startRequest.get("you")));
         snake.setBrain(brain);
 

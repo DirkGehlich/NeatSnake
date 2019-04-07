@@ -42,9 +42,10 @@ public class ObjectCreator {
 	
 	public static Board createBoard(JsonNode jsonNode) {
 		
-		int boardSize = jsonNode.get("height").asInt();
-		if (boardSize < 1) {
-			LOG.error("Board size too small: " + boardSize);
+		int boardSizeX = jsonNode.get("width").asInt();
+		int boardSizeY = jsonNode.get("height").asInt();
+		if (boardSizeX < 1 || boardSizeY < 1) {
+			LOG.error("Board size too small: " + boardSizeX + ":" + boardSizeY);
 		}
 		
 		List<Field> foodPositions = new ArrayList<Field>();
@@ -53,14 +54,14 @@ public class ObjectCreator {
 		jsonNode.get("food").forEach(food -> foodPositions.add(createField(food)));
 		jsonNode.get("snakes").forEach(snake -> snakes.add(createSnake(snake)));
 		
-		if (foodPositions.isEmpty()) {
-			LOG.error("Food positions empty");
-		}
+//		if (foodPositions.isEmpty()) {
+//			LOG.error("Food positions empty");
+//		}
 		
 		if (snakes.isEmpty()) {
 			LOG.error("Snakes list empty");
 		}
 		
-		return new Board(boardSize, foodPositions, snakes);
+		return new Board(boardSizeX, boardSizeY, foodPositions, snakes);
 	}
 }

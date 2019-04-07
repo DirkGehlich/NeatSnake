@@ -1,6 +1,7 @@
 package io.battlesnake.logic;
 
 import java.util.LinkedList;
+
 import org.neuroph.nnet.MultiLayerPerceptron;
 
 import io.battlesnake.world.Board;
@@ -9,10 +10,10 @@ import io.battlesnake.world.Snake;
 
 public class NeatSnake extends Snake {
 
-	private MultiLayerPerceptron brain;
+	protected MultiLayerPerceptron brain = null;
 
-	private double[] inputs = new double[25];
-	private Board board;
+	private double[] inputs = new double[24];
+	protected Board board;
 	
 	public NeatSnake(Snake snake) {
 		super(snake);
@@ -37,7 +38,7 @@ public class NeatSnake extends Snake {
 		return nextField;
 	}
 
-	private void look() {		
+	protected void look() {		
 		// Look in each of the 8 direction and find the nearest snake, food and wall
 		double[] info = getInfoFromDirection(new Field(-1, 0));
 		inputs[0] = info[0];
@@ -78,32 +79,31 @@ public class NeatSnake extends Snake {
 		inputs[21] = info[0];
 		inputs[22] = info[1];
 		inputs[23] = info[2];
-		
-		inputs[24] = (double)health / MAXHEALTH;
-		
+				
 		evaluateNearestFood();
 	}
 	
 	public double[] getInfoFromDirection(Field direction) {
 		
-		int boardSize = board.getBoardsize();
+		int boardSizeX = board.getBoardSizeX();
+		int boardSizeY = board.getBoardSizeY();
 		double[] info = new double[3];
 		
 		int distance = 0;
-		Field currentPos = headPosition.clone();
+		Field currentPos = getHeadPosition().clone();
 		boolean snakeFound = false;
 		
 		// TODO: Always try to get some distance to food
 		// Get shortest distance to food from this position.
 		// Idea could be to not only take shortest one, but area with most food, so that when one gets stealen by an enemy, we are still in an area of food
 		
-		Field tmpPos = headPosition.clone();
+		Field tmpPos = getHeadPosition().clone();
 		tmpPos.add(direction);
 		
 		if (tmpPos.getX() >= 0 && tmpPos.getY() >= 0) {
 			double distanceBefore = 1000.0;
 			for (Field f : board.getFoodPositions()) {
-				double distanceToFood = headPosition.distanceTo(f);
+				double distanceToFood = currentPos.distanceTo(f);
 				if (distanceToFood < distanceBefore)
 					distanceBefore = distanceToFood;
 			}
@@ -130,7 +130,7 @@ public class NeatSnake extends Snake {
 				info[1] = 1.0/distance;
 			}
 				
-		} while (currentPos.getX() < boardSize && currentPos.getY() < boardSize &&
+		} while (currentPos.getX() < boardSizeX && currentPos.getY() < boardSizeY &&
 		         currentPos.getX() >= 0 && currentPos.getY() >= 0);
 				
 		
