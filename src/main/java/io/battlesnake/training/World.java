@@ -38,7 +38,7 @@ public class World extends JFrame implements KeyListener {
 	final int FIELD_SIZE = 50;
 	final int FRAME_WIDTH = 800;
 	final int FRAME_HEIGHT = 600;
-	final int MOVETIME_MS = 100;
+	final int MOVETIME_MS = 20;
 	
 	boolean worldRunning = false;
 	

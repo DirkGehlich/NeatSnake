@@ -67,14 +67,17 @@
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>1.6.0</version>
-				<configuration>
-					<executable>java</executable>
-					<arguments>
-						<argument>-classpath</argument>
-						<classpath />
-						<argument>io.battlesnake.server.GameServer</argument>
-					</arguments>
-				</configuration>
+				<executions>
+		        	<execution>
+		        		<id>training</id>
+		           		<goals>
+		            		<goal>java</goal>
+		           		</goals>
+		           		<configuration>
+		        			<mainClass>io.battlesnake.training.World</mainClass>
+		    			</configuration>
+		        	</execution>
+		    	</executions>
 			</plugin>
 			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
