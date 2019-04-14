@@ -15,53 +15,53 @@ import io.battlesnake.world.Snake;
 
 public class ObjectCreator {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Snake.class);
-    
+	private static final Logger LOG = LoggerFactory.getLogger(Snake.class);
+
 	public static Snake createSnake(JsonNode jsonNode) {
 
 		LinkedList<Field> body = createBody(jsonNode.get("body"));
 		int health = jsonNode.get("health").asInt();
-		
+
 		return new Snake(body, health);
 	}
-	
+
 	private static Field createField(JsonNode jsonNode) {
-		return new Field(jsonNode.get("x").asInt(), jsonNode.get("y").asInt());		
+		return new Field(jsonNode.get("x").asInt(), jsonNode.get("y").asInt());
 	}
-	
+
 	public static LinkedList<Field> createBody(JsonNode jsonNode) {
 		LinkedList<Field> body = new LinkedList<Field>();
 		jsonNode.forEach(field -> body.add(createField(field)));
-		
+
 		if (body.isEmpty()) {
 			LOG.error("Body empty");
 		}
-		
+
 		return body;
 	}
-	
+
 	public static Board createBoard(JsonNode jsonNode) {
-		
+
 		int boardSizeX = jsonNode.get("width").asInt();
 		int boardSizeY = jsonNode.get("height").asInt();
 		if (boardSizeX < 1 || boardSizeY < 1) {
 			LOG.error("Board size too small: " + boardSizeX + ":" + boardSizeY);
 		}
-		
+
 		List<Field> foodPositions = new ArrayList<Field>();
 		List<Snake> snakes = new ArrayList<Snake>();
 
 		jsonNode.get("food").forEach(food -> foodPositions.add(createField(food)));
 		jsonNode.get("snakes").forEach(snake -> snakes.add(createSnake(snake)));
-		
+
 //		if (foodPositions.isEmpty()) {
 //			LOG.error("Food positions empty");
 //		}
-		
+
 		if (snakes.isEmpty()) {
 			LOG.error("Snakes list empty");
 		}
-		
+
 		return new Board(boardSizeX, boardSizeY, foodPositions, snakes);
 	}
 }

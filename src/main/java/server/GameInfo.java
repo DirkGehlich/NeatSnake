@@ -9,11 +9,11 @@ public class GameInfo {
 	private int turn;
 	private Board board;
 	private Snake you;
-	
+
 	public GameInfo() {
-		
+
 	}
-	
+
 	public GameInfo(Game game, int turn, Board board, Snake you) {
 		this.game = game;
 		this.turn = turn;
@@ -52,7 +52,5 @@ public class GameInfo {
 	public void setYou(Snake you) {
 		this.you = you;
 	}
-	
-	
-	
+
 }

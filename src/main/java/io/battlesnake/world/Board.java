@@ -10,18 +10,17 @@ public class Board {
 	List<Field> foodPositions;
 	List<Snake> snakes;
 	List<Field> snakePositions = new ArrayList<Field>();
-	
-	
+
 	public Board(int boardSizeX, int boardSizeY, List<Field> foodPositions, List<Snake> snakes) {
 		super();
 		this.BOARD_SIZE_X = boardSizeX;
 		this.BOARD_SIZE_Y = boardSizeY;
 		this.foodPositions = foodPositions;
 		this.snakes = snakes;
-		
+
 		snakes.forEach(snake -> snakePositions.addAll(snake.body));
 	}
-	
+
 	public Board(int boardSizeX, int boardSizeY, List<Field> snakePositions) {
 		super();
 		this.BOARD_SIZE_X = boardSizeX;
@@ -36,16 +35,14 @@ public class Board {
 	public int getBoardSizeY() {
 		return BOARD_SIZE_Y;
 	}
-	
+
 	public List<Field> getFoodPositions() {
 		return foodPositions;
 	}
 
-
 	public List<Snake> getSnakes() {
 		return snakes;
 	}
-
 
 	public List<Field> getSnakePositions() {
 		return snakePositions;
@@ -58,6 +55,5 @@ public class Board {
 	public void setFoodPositions(List<Field> foodPositions) {
 		this.foodPositions = foodPositions;
 	}
-	
-	
+
 }

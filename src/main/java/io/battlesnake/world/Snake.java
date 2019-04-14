@@ -4,17 +4,22 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class Snake {
-	
+
 	protected final int MAXHEALTH;
 	protected LinkedList<Field> body;
 	protected int health;
-		
+
 	public Snake(Snake snake) {
 		this.body = snake.body;
 		this.health = snake.health;
 		this.MAXHEALTH = snake.MAXHEALTH;
 	}
-	
+
+	public Snake() {
+		super();
+		this.MAXHEALTH = 0;
+	}
+
 	public Snake(LinkedList<Field> body, int health) {
 		super();
 		this.body = body;
