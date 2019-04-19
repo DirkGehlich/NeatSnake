@@ -1,7 +1,5 @@
 package io.battlesnake.neat;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 import io.battlesnake.neat.NodeGene.Type;
@@ -9,7 +7,7 @@ import io.battlesnake.neat.NodeGene.Type;
 public class Genome {
 
 	private Random random = new Random();
-	private List<NodeGene> nodeGenes = new ArrayList<NodeGene>();
+	private NodeGenes nodeGenes = new NodeGenes();
 	private ConnectionGenes connectionGenes = new ConnectionGenes();
 
 	
@@ -43,15 +41,12 @@ public class Genome {
 			return;
 		}
 		
-		int node1Idx = random.nextInt(nodeGenes.size());
-		int node2Idx = random.nextInt(nodeGenes.size());
+		NodeGene node1 = nodeGenes.get(random.nextInt(nodeGenes.size()));
+		NodeGene node2 = nodeGenes.get(random.nextInt(nodeGenes.size()));
 
-		if (connectionGenes.isGeneConnected(node1Idx) || connectionGenes.isGeneConnected(node2Idx)) {
+		if (connectionGenes.isGeneConnected(node1.getInnovationNumber()) || connectionGenes.isGeneConnected(node2.getInnovationNumber())) {
 			return;
 		}
-
-		NodeGene node1 = nodeGenes.get(node1Idx);
-		NodeGene node2 = nodeGenes.get(node2Idx);
 
 		// TODO: Don't connect same layers?
 		if (node1.getType() == node2.getType()) {
@@ -64,8 +59,8 @@ public class Genome {
 		float randomWeight = random.nextFloat() * 2.0f - 1.0f;
 		boolean enabled = true;
 		int innovationNr = InnovationNrGenerator.getNext();
-		ConnectionGene connection = new ConnectionGene(invertConnection ? node2Idx : node1Idx,
-				invertConnection ? node1Idx : node2Idx, randomWeight, enabled, innovationNr);
+		ConnectionGene connection = new ConnectionGene(invertConnection ? node2.getInnovationNumber() : node1.getInnovationNumber(),
+				invertConnection ? node1.getInnovationNumber() : node2.getInnovationNumber(), randomWeight, enabled, innovationNr);
 
 		connectionGenes.add(connection);
 	}
@@ -83,19 +78,19 @@ public class Genome {
 		
 		ConnectionGene oldConnection = connectionGenes.get(random.nextInt(connectionGenes.size()));
 		
-		NodeGene newNode = new NodeGene(Type.Hidden);
+		NodeGene newNode = new NodeGene(Type.Hidden, InnovationNrGenerator.getNext());
 		nodeGenes.add(newNode);
 		int newNodeIdx = nodeGenes.size()-1;
 		
 		oldConnection.disable();
-		ConnectionGene connectionIn = new ConnectionGene(oldConnection.getInNodeIdx(), newNodeIdx, 1, true, InnovationNrGenerator.getNext());
-		ConnectionGene connectionOut = new ConnectionGene(newNodeIdx, oldConnection.getOutNodeIdx(), oldConnection.getWeight(), true, InnovationNrGenerator.getNext());
+		ConnectionGene connectionIn = new ConnectionGene(oldConnection.getInNodeInnovationNr(), newNodeIdx, 1, true, InnovationNrGenerator.getNext());
+		ConnectionGene connectionOut = new ConnectionGene(newNodeIdx, oldConnection.getOutNodeInnovationNr(), oldConnection.getWeight(), true, InnovationNrGenerator.getNext());
 		
 		connectionGenes.add(connectionIn);
 		connectionGenes.add(connectionOut);		
 	}
 
-	public List<NodeGene> getNodeGenes() {
+	public NodeGenes getNodeGenes() {
 		return nodeGenes;
 	}
 

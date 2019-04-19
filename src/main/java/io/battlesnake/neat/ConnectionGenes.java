@@ -9,7 +9,12 @@ public class ConnectionGenes extends ArrayList<ConnectionGene> {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public boolean isGeneConnected(int nodeGeneIdx) {		
-		return stream().anyMatch(g -> g.getInNodeIdx() == nodeGeneIdx || g.getOutNodeIdx() == nodeGeneIdx);
+	/**
+	 * A NodeGene is connected when its part of any ConnectionGene (either in or out)  
+	 * @param nodeGeneIdx the NodeGene index to test the connection for
+	 * @return true if its part of any connection
+	 */
+	public boolean isGeneConnected(int innovationNumber) {		
+		return stream().anyMatch(g -> g.getInNodeInnovationNr() == innovationNumber || g.getOutNodeInnovationNr() == innovationNumber);
 	}
 }

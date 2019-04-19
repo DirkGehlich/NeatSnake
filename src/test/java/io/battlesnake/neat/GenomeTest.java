@@ -24,20 +24,21 @@ class GenomeTest {
 	@BeforeEach
 	public void setUp() throws Exception {
 		MockitoAnnotations.initMocks(this);
+		InnovationNrGenerator.reset();
 	}
 	
 	@Test
 	void performAddConnectionMutation_noNodeGenes_dontMutate() {
 		genome.performAddConnectionMutation();
 
-		assertEquals(genome.getConnectionGenes().size(), 0);
+		assertEquals(0, genome.getConnectionGenes().size());
 	}
 
 	@Test
 	void performAddConnectionMutation_alreadyConnected_dontMutate() {
-		NodeGene gene1 = new NodeGene(Type.Input);
-		NodeGene gene2 = new NodeGene(Type.Output);
-		ConnectionGene connection = new ConnectionGene(0, 1, 0.3f, true, 1);
+		NodeGene gene1 = new NodeGene(Type.Input, InnovationNrGenerator.getNext());
+		NodeGene gene2 = new NodeGene(Type.Output, InnovationNrGenerator.getNext());
+		ConnectionGene connection = new ConnectionGene(0, 1, 0.3f, true, InnovationNrGenerator.getNext());
 
 		when(random.nextInt(2)).thenReturn(0);
 		genome.addNodeGene(gene1);
@@ -46,13 +47,13 @@ class GenomeTest {
 
 		genome.performAddConnectionMutation();
 
-		assertEquals(genome.getConnectionGenes().size(), 1);
+		assertEquals(1, genome.getConnectionGenes().size());
 	}
 
 	@Test
 	void performAddConnectionMutation_sameLayer_dontMutate() {
-		NodeGene gene1 = new NodeGene(Type.Output);
-		NodeGene gene2 = new NodeGene(Type.Output);
+		NodeGene gene1 = new NodeGene(Type.Output, InnovationNrGenerator.getNext());
+		NodeGene gene2 = new NodeGene(Type.Output, InnovationNrGenerator.getNext());
 
 		when(random.nextInt(2)).thenReturn(0, 1);
 		genome.addNodeGene(gene1);
@@ -60,13 +61,13 @@ class GenomeTest {
 
 		genome.performAddConnectionMutation();
 
-		assertEquals(genome.getConnectionGenes().size(), 0);
+		assertEquals(0, genome.getConnectionGenes().size());
 	}
 
 	@Test
 	void performAddConnectionMutation_notInverted_mutate() {
-		NodeGene gene1 = new NodeGene(Type.Input);
-		NodeGene gene2 = new NodeGene(Type.Output);
+		NodeGene gene1 = new NodeGene(Type.Input, InnovationNrGenerator.getNext());
+		NodeGene gene2 = new NodeGene(Type.Output, InnovationNrGenerator.getNext());
 
 		when(random.nextInt(2)).thenReturn(0, 1);
 		when(random.nextFloat()).thenReturn(0.25f); // weight
@@ -75,18 +76,18 @@ class GenomeTest {
 
 		genome.performAddConnectionMutation();
 
-		assertEquals(genome.getConnectionGenes().size(), 1);
-		ConnectionGene connection = genome.getConnectionGenes().get(genome.getConnectionGenes().size() - 1);
-		assertEquals(connection.getInNodeIdx(), 0);
-		assertEquals(connection.getOutNodeIdx(), 1);
-		assertEquals(connection.getWeight(), -0.5f);
-		assertEquals(connection.isEnabled(), true);
+		assertEquals(1, genome.getConnectionGenes().size());
+		ConnectionGene connection = genome.getConnectionGenes().get(0);
+		assertEquals(1, connection.getInNodeInnovationNr());
+		assertEquals(2, connection.getOutNodeInnovationNr());
+		assertEquals(-0.5f, connection.getWeight());
+		assertEquals(true, connection.isEnabled());
 	}
 	
 	@Test
 	void performAddConnectionMutation_inverted_mutate() {
-		NodeGene gene1 = new NodeGene(Type.Input);
-		NodeGene gene2 = new NodeGene(Type.Output);
+		NodeGene gene1 = new NodeGene(Type.Input, InnovationNrGenerator.getNext());
+		NodeGene gene2 = new NodeGene(Type.Output, InnovationNrGenerator.getNext());
 
 		when(random.nextInt(2)).thenReturn(1, 0);
 		when(random.nextFloat()).thenReturn(0.25f); // weight
@@ -95,27 +96,27 @@ class GenomeTest {
 
 		genome.performAddConnectionMutation();
 
-		assertEquals(genome.getConnectionGenes().size(), 1);
-		ConnectionGene connection = genome.getConnectionGenes().get(genome.getConnectionGenes().size() - 1);
-		assertEquals(connection.getInNodeIdx(), 0);
-		assertEquals(connection.getOutNodeIdx(), 1);
-		assertEquals(connection.getWeight(), -0.5f);
-		assertEquals(connection.isEnabled(), true);
+		assertEquals(1, genome.getConnectionGenes().size());
+		ConnectionGene connection = genome.getConnectionGenes().get(0);
+		assertEquals(1, connection.getInNodeInnovationNr());
+		assertEquals(2, connection.getOutNodeInnovationNr());
+		assertEquals(-0.5f, connection.getWeight());
+		assertEquals(true, connection.isEnabled());
 	}
 	
 	@Test
 	void performAddNodeMutation_noConnections_dontMutate() {
 		genome.performAddNodeMutation();
 
-		assertEquals(genome.getNodeGenes().size(), 0);
-		assertEquals(genome.getConnectionGenes().size(), 0);
+		assertEquals(0, genome.getNodeGenes().size());
+		assertEquals(0, genome.getConnectionGenes().size());
 	}
 	
 	@Test
 	void performAddNodeMutation_connections_mutate() {
-		NodeGene gene1 = new NodeGene(Type.Input);
-		NodeGene gene2 = new NodeGene(Type.Output);
-		ConnectionGene connection = new ConnectionGene(0, 1, 0.3f, true, 1);
+		NodeGene gene1 = new NodeGene(Type.Input, InnovationNrGenerator.getNext());
+		NodeGene gene2 = new NodeGene(Type.Output, InnovationNrGenerator.getNext());
+		ConnectionGene connection = new ConnectionGene(0, 1, 0.3f, true, InnovationNrGenerator.getNext());
 
 		when(random.nextInt(1)).thenReturn(0);
 		genome.addNodeGene(gene1);
@@ -124,18 +125,18 @@ class GenomeTest {
 
 		genome.performAddNodeMutation();
 
-		assertEquals(genome.getNodeGenes().size(), 3);
-		assertEquals(genome.getConnectionGenes().size(), 3);
-		
+		assertEquals(3, genome.getNodeGenes().size());
+		assertEquals(3, genome.getConnectionGenes().size());
+
 		ConnectionGene inConnection = genome.getConnectionGenes().get(1);
 		ConnectionGene outConnection = genome.getConnectionGenes().get(2);
-		assertEquals(inConnection.getWeight(), 1f);
-		assertEquals(outConnection.getWeight(), 0.3f);
+		assertEquals(1f, inConnection.getWeight());
+		assertEquals(0.3f, outConnection.getWeight());
 		
-		assertEquals(inConnection.getInNodeIdx(), 0);
-		assertEquals(inConnection.getOutNodeIdx(), 2);
+		assertEquals(0, inConnection.getInNodeInnovationNr());
+		assertEquals(2, inConnection.getOutNodeInnovationNr());
 		
-		assertEquals(outConnection.getInNodeIdx(), 2);
-		assertEquals(outConnection.getOutNodeIdx(), 1);
+		assertEquals(2, outConnection.getInNodeInnovationNr());
+		assertEquals(1, outConnection.getOutNodeInnovationNr());
 	}
 }

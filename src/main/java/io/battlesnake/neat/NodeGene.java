@@ -1,6 +1,6 @@
 package io.battlesnake.neat;
 
-public class NodeGene {
+public class NodeGene extends Gene {
 
 	public enum Type {
 		Input,
@@ -11,8 +11,8 @@ public class NodeGene {
 	private Type type;
 
 	
-	public NodeGene(Type type) {
-		super();
+	public NodeGene(Type type, int innovationNumber) {
+		super(innovationNumber);
 		this.type = type;
 	}
 
