@@ -2,15 +2,35 @@ package io.battlesnake.neat;
 
 public class Gene {
 
-	private int innovationNumber;
+	protected int innovationNr;
 
 	
-	public Gene(int innovationNumber) {
+	public Gene(int innovationNr) {
 		super();
-		this.innovationNumber = innovationNumber;
+		this.innovationNr = innovationNr;
 	}
 
 	public int getInnovationNumber() {
-		return innovationNumber;
+		return innovationNr;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		
+		if (obj == null || obj.getClass() != this.getClass()) {
+			return false;
+		}
+		
+		ConnectionGene connection = (ConnectionGene)obj;
+		
+		return (connection.innovationNr == this.innovationNr);
+	}
+	
+	@Override
+	public int hashCode() {
+		return innovationNr;
 	}
 }

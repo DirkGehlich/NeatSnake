@@ -17,4 +17,8 @@ public class ConnectionGenes extends ArrayList<ConnectionGene> {
 	public boolean isGeneConnected(int innovationNumber) {		
 		return stream().anyMatch(g -> g.getInNodeInnovationNr() == innovationNumber || g.getOutNodeInnovationNr() == innovationNumber);
 	}
+	
+	public ConnectionGene getConnectionGene(int innovationNr) {
+		return this.stream().filter(g -> g.innovationNr == innovationNr).findFirst().orElse(null);
+	}
 }

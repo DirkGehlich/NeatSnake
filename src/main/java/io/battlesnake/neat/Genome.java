@@ -31,6 +31,21 @@ public class Genome {
 	public void addConnectionGene(ConnectionGene connectionGene) {
 		connectionGenes.add(connectionGene);
 	}
+	
+	/**
+	 * "each weight had a 90% chance of
+	 * being uniformly perturbed and a 10% chance of being assigned a new random value."
+	 */
+	public void performWeightMutation() {
+		for (ConnectionGene connection : connectionGenes) {
+			float rnd = random.nextFloat() * 2f - 1f;
+			if (random.nextFloat() < Parameters.PROBABILITY_WEIGHT_PERTURBING) {
+				connection.setWeight(connection.getWeight() * rnd);
+			} else  {
+				connection.setWeight(rnd);
+			}			
+		}
+	}
 
 	/**
 	 * "A single new connection gene with a random weight is added connecting two
@@ -80,11 +95,10 @@ public class Genome {
 		
 		NodeGene newNode = new NodeGene(Type.Hidden, InnovationNrGenerator.getNext());
 		nodeGenes.add(newNode);
-		int newNodeIdx = nodeGenes.size()-1;
 		
 		oldConnection.disable();
-		ConnectionGene connectionIn = new ConnectionGene(oldConnection.getInNodeInnovationNr(), newNodeIdx, 1, true, InnovationNrGenerator.getNext());
-		ConnectionGene connectionOut = new ConnectionGene(newNodeIdx, oldConnection.getOutNodeInnovationNr(), oldConnection.getWeight(), true, InnovationNrGenerator.getNext());
+		ConnectionGene connectionIn = new ConnectionGene(oldConnection.getInNodeInnovationNr(), newNode.getInnovationNumber(), 1, true, InnovationNrGenerator.getNext());
+		ConnectionGene connectionOut = new ConnectionGene(newNode.getInnovationNumber(), oldConnection.getOutNodeInnovationNr(), oldConnection.getWeight(), true, InnovationNrGenerator.getNext());
 		
 		connectionGenes.add(connectionIn);
 		connectionGenes.add(connectionOut);		
