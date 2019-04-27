@@ -15,6 +15,7 @@ public class Species extends ArrayList<Genome> {
 
 	public Species(Genome representative) {
 		this.representative = representative;
+		this.add(representative);
 	}
 
 	public Genome getRepresentative() {

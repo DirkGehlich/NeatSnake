@@ -16,13 +16,13 @@ public class Population {
 	private int generationNr = 0;
 
 	public Population(Genome initialGenome) {
-		for (int i=0; i < Parameters.populationSize; ++i) {
+		for (int i = 0; i < Parameters.populationSize; ++i) {
 			population.add(initialGenome.copy());
 		}
-		
+
 		fittestGenome = initialGenome;
 	}
-	
+
 	public Genome crossover(Genome parent1, Genome parent2) {
 
 		Genome child = new Genome(random, parent1.getNumOutNodes());
@@ -53,15 +53,29 @@ public class Population {
 		resetAllSpecies();
 		cleanupTemps();
 		addGenomesToSpecies();
+		removeEmptySpecies();
 		setAdjustedFitnessToGenomes();
 		// TODO: remove weakest genomes from species
 		addBestGenomesOfEachSpeciesToNewGeneration();
 		breedPopulation();
 		++generationNr;
 	}
-	
+
 	private void cleanupTemps() {
-		nextPopulation.clear();
+		nextPopulation = new ArrayList<Genome>();
+		highestFitness = 0;
+		fittestGenome = null;
+	}
+
+	private void removeEmptySpecies() {
+		// remove empty species
+		Iterator<Species> i = this.species.iterator();
+		while (i.hasNext()) {
+			Species species = i.next();
+			if (species.size() == 0) {
+				i.remove();
+			}
+		}
 	}
 
 	/**
@@ -71,15 +85,6 @@ public class Population {
 	 */
 	private void resetAllSpecies() {
 
-		// remove empty species
-		Iterator<Species> i = this.species.iterator();
-		while (i.hasNext()) {
-			Species species = i.next();
-			if (species.size() == 0) {
-				i.remove();
-			}
-		}
-		
 		for (Species species : this.species) {
 			species.reset(random);
 		}
@@ -99,6 +104,7 @@ public class Population {
 				if (genome.fitsIntoSpecies(species)) {
 					species.add(genome);
 					speciesFound = true;
+					break;
 				}
 			}
 
@@ -117,13 +123,13 @@ public class Population {
 	 */
 	private void setAdjustedFitnessToGenomes() {
 		for (Species species : this.species) {
-			for (Genome genome : this.population) {
+			for (Genome genome : species) {
 				double fitness = genome.getFitness();
 				double adjustedFitness = fitness / species.size();
 				genome.setFitness(adjustedFitness);
 				species.addAdjustedFitness(adjustedFitness);
-				
-				if (fitness > highestFitness) {
+
+				if (fitness >= highestFitness) {
 					highestFitness = fitness;
 					fittestGenome = genome;
 				}
@@ -159,13 +165,13 @@ public class Population {
 			}
 
 			child.mutate();
-			
+
 			nextPopulation.add(child);
 		}
-		
+
 		population = nextPopulation;
 	}
-	
+
 	private Species selectRandomSpeciesBasedOnAdjustedFitness() {
 		double adjustedFitnessSum = getAdjustedSpeciesFitnessSum();
 
@@ -207,6 +213,5 @@ public class Population {
 	public List<Genome> getPopulation() {
 		return population;
 	}
-	
-	
+
 }

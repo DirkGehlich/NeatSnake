@@ -12,7 +12,7 @@ class NeatAlgorithmTest {
 		Population population = neat.getPopulation();
 		boolean done = false;
 
-		for (int i = 0; i < 100 && !done; ++i) {
+		for (int i = 0; i < 1000 && !done; ++i) {
 			for (Genome genome : population.getPopulation()) {
 
 				genome.setInputs(new float[] { 0, 0 });
