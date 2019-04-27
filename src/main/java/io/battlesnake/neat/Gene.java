@@ -10,7 +10,7 @@ public class Gene {
 		this.innovationNr = innovationNr;
 	}
 
-	public int getInnovationNumber() {
+	public int getInnovationNr() {
 		return innovationNr;
 	}
 	

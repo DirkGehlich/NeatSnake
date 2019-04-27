@@ -175,8 +175,12 @@ class GenomeTest {
 	@Test
 	void calculateCompatibilityDistance_disjointAndExcess_calculate() {
 
+		Parameters.c1 = 0.1f;
+		Parameters.c2 = 0.2f;
+		Parameters.c3 = 0.3f;
+		
 		// Genome 1
-		Genome genome1 = new Genome(new Random());
+		Genome genome1 = new Genome(new Random(), 0);
 		genome1.addConnectionGene(new ConnectionGene(1, 4, 0.1f, true, 1));
 		genome1.addConnectionGene(new ConnectionGene(2, 4, 0.2f, false, 2));
 		genome1.addConnectionGene(new ConnectionGene(3, 4, 0.3f, true, 3));
@@ -185,7 +189,7 @@ class GenomeTest {
 		genome1.addConnectionGene(new ConnectionGene(1, 5, 0.6f, true, 8));
 
 		// Genome 2
-		Genome genome2 = new Genome(new Random());
+		Genome genome2 = new Genome(new Random(), 0);
 		genome2.addConnectionGene(new ConnectionGene(1, 4, 0.9f, true, 1));
 		genome2.addConnectionGene(new ConnectionGene(2, 4, 0.8f, false, 2));
 		genome2.addConnectionGene(new ConnectionGene(3, 4, 0.7f, true, 3));
@@ -196,9 +200,8 @@ class GenomeTest {
 		genome2.addConnectionGene(new ConnectionGene(3, 5, 0.2f, true, 9));
 		genome2.addConnectionGene(new ConnectionGene(1, 6, 0.1f, true, 10));
 
-		Population population = new Population();
-		float distance = population.calculateCompatibilityDistance(genome1, genome2);
+		float distance = genome1.calculateCompatibilityDistanceTo(genome2);
 		
-		assertEquals(5.16, distance, 0.001f);
+		assertEquals(0.92, distance, 0.001f);
 	}
 }
