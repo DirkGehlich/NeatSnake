@@ -6,10 +6,10 @@ public class NodeGene extends Gene {
 		Input, Hidden, Output, Bias;
 	}
 
+	private double activation = 0;
 	private Type type;
-	private double activation;
-	private double activationSum;
-
+	private double weightedInputSum = 0;
+	
 	public NodeGene(Type type, int innovationNumber) {
 		super(innovationNumber);
 		this.type = type;
@@ -18,9 +18,18 @@ public class NodeGene extends Gene {
 			activation = 1.0;
 		}
 	}
+	
+	public NodeGene(NodeGene nodeGene) {
+		super(nodeGene.innovationNr);
+		this.type = nodeGene.type;
+		
+		if (type == Type.Bias) {
+			activation = 1.0;
+		}
+	}
 
 	public NodeGene copy() {
-		return new NodeGene(type, innovationNr);
+		return new NodeGene(this);
 	}
 
 	public Type getType() {
@@ -35,15 +44,31 @@ public class NodeGene extends Gene {
 		this.activation = activation;
 	}
 
-	public double getActivationSum() {
-		return activationSum;
-	}
-
-	public void addActivationSum(double activation) {
-		this.activationSum += activation;
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		
+		if (obj == null || obj.getClass() != this.getClass()) {
+			return false;
+		}
+		
+		NodeGene nodeGene = (NodeGene)obj;
+		
+		return (nodeGene.innovationNr == this.innovationNr);		
 	}
 	
-	public void restActivationSum() {
-		this.activationSum = 0;
+	@Override
+	public int hashCode() {
+		return this.innovationNr;
+	}
+	public void activate() {
+		
+		activation = 1/(1 + Math.exp(-4.9 * weightedInputSum));
+	}
+	
+	public void addWeightedInputSum(double weightedInputSum) {
+		this.weightedInputSum  += weightedInputSum;
 	}
 }

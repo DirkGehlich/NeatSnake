@@ -1,6 +1,7 @@
 package io.battlesnake.neat;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 
 public class Species extends ArrayList<Genome> {
@@ -29,6 +30,7 @@ public class Species extends ArrayList<Genome> {
 	public void reset(Random random) {
 		int representativeIdx = random.nextInt(size());
 		this.representative = this.get(representativeIdx);
+		this.adjustedFitness = 0;
 		this.clear();
 	}
 
@@ -37,17 +39,15 @@ public class Species extends ArrayList<Genome> {
 	}
 
 	public Genome getBestGenome() {
-		Genome bestGenome = null;
-		double highestFitness = 0;
-
-		for (Genome genome : this) {
-			if (genome.getFitness() > highestFitness) {
-				highestFitness = genome.getFitness();
-				bestGenome = genome;
-			}
+		if (isEmpty()) {
+			throw new RuntimeException("Cannot get fittest genome as the species is empty");
 		}
-
-		return bestGenome;
+		
+		return get(0);
+	}
+	
+	public void sortSpeciesByFitness() {
+		Collections.sort(this, (a, b) -> a.getFitness() < b.getFitness() ? 1 : a.getFitness() == b.getFitness() ? 0 : -1);
 	}
 	
 	public Genome selectRandomGenomeBasedOnAdjustedFitness(Random random) {

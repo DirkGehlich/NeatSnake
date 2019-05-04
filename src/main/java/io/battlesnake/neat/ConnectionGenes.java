@@ -1,6 +1,8 @@
 package io.battlesnake.neat;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ConnectionGenes extends ArrayList<ConnectionGene> {
 
@@ -37,6 +39,7 @@ public class ConnectionGenes extends ArrayList<ConnectionGene> {
 		return this.stream().filter(g -> g.innovationNr == innovationNr).findFirst().orElse(null);
 	}
 	
+	
 	@Override
 	public boolean add(ConnectionGene e) {
 		if (e.getInnovationNr() > maxInnovationNr) {
@@ -48,5 +51,20 @@ public class ConnectionGenes extends ArrayList<ConnectionGene> {
 
 	public int getMaxInnovationNr() {
 		return maxInnovationNr;
+	}
+	
+	public boolean isNodeConnected(int srcInnovationNr, int toFollowInnovationNr) {		
+		if (srcInnovationNr == toFollowInnovationNr) {
+			return true;
+		}
+		
+		List<ConnectionGene> connections = stream().filter(c -> c.getInNodeInnovationNr() == toFollowInnovationNr).collect(Collectors.toList());
+		for (ConnectionGene connection : connections) {
+			if (isNodeConnected(srcInnovationNr, connection.getOutNodeInnovationNr())) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 }

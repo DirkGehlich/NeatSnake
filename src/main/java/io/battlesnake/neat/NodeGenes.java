@@ -14,7 +14,7 @@ public class NodeGenes extends ArrayList<NodeGene> {
 	
 	private NodeGenes(NodeGenes nodeGenes) {
 		for (NodeGene node : nodeGenes) {
-			add(node.copy());
+			add(node);
 		}		
 	}
 	
@@ -25,4 +25,5 @@ public class NodeGenes extends ArrayList<NodeGene> {
 	public NodeGene getByInnovatioNr(int innovationNr) {
 		return stream().filter(n -> n.getInnovationNr() == innovationNr).findFirst().orElseThrow(() -> new RuntimeException("NodeGene not found!"));
 	}
+	
 }

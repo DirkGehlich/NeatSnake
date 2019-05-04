@@ -1,8 +1,10 @@
 package io.battlesnake.neat;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Random;
 
 public class Population {
@@ -11,32 +13,30 @@ public class Population {
 	private List<Species> species = new ArrayList<Species>();
 	private List<Genome> population = new ArrayList<Genome>();
 	private List<Genome> nextPopulation = new ArrayList<Genome>();
-	private Genome fittestGenome;
-	private double highestFitness = 0;
 	private int generationNr = 0;
 
 	public Population(Genome initialGenome) {
 		for (int i = 0; i < Parameters.populationSize; ++i) {
-			population.add(initialGenome.copy());
+			Genome genomeCopy = initialGenome.copy();
+			genomeCopy.randomizeWeights();
+			population.add(genomeCopy);
 		}
-
-		fittestGenome = initialGenome;
 	}
 
 	public Genome crossover(Genome parent1, Genome parent2) {
 
-		Genome child = new Genome(random, parent1.getNumOutNodes());
+		Genome child = new Genome(random);
 
 		// TOOD: Not sure about this part. We need all nodes from both parents as the
 		// connections point to them
 		// child.getNodeGenes().addAll(parent2.getNodeGenes());
 		for (NodeGene node : parent1.getNodeGenes()) {
-			child.getNodeGenes().add(node.copy());
+			child.addNodeGene(node.copy());
 		}
 
 		for (ConnectionGene parent1Connection : parent1.getConnectionGenes()) {
 			ConnectionGene parent2Connection = parent2.getConnectionGenes().stream()
-					.filter(c -> c.getInNodeInnovationNr() == parent1Connection.getInNodeInnovationNr()).findFirst()
+					.filter(c -> c.getInnovationNr() == parent1Connection.getInnovationNr()).findFirst()
 					.orElse(null);
 
 			if (parent2Connection != null) {
@@ -55,16 +55,32 @@ public class Population {
 		addGenomesToSpecies();
 		removeEmptySpecies();
 		setAdjustedFitnessToGenomes();
+		removeWeakestGenomesFromEachSpecies();
 		// TODO: remove weakest genomes from species
 		addBestGenomesOfEachSpeciesToNewGeneration();
 		breedPopulation();
 		++generationNr;
 	}
 
+	private void removeWeakestGenomesFromEachSpecies() {
+		for (Species s : species) {
+			int numGenomesToRemove = (int)(s.size() * Parameters.removeWeakestGenomesPercentage);
+			s.sortSpeciesByFitness();
+			ListIterator<Genome> iter = s.listIterator(s.size());
+			
+			while (iter.hasPrevious() && numGenomesToRemove > 0) {
+				--numGenomesToRemove;
+				Genome g = iter.previous();
+				int idx = population.indexOf(g);
+				population.remove(idx);
+				iter.remove();				
+			}
+		}
+		
+	}
+
 	private void cleanupTemps() {
 		nextPopulation = new ArrayList<Genome>();
-		highestFitness = 0;
-		fittestGenome = null;
 	}
 
 	private void removeEmptySpecies() {
@@ -116,7 +132,7 @@ public class Population {
 			}
 		}
 	}
-
+	
 	/**
 	 * An adjusted fitness is the fitness of a genome divided by the number of
 	 * genomes within its species
@@ -129,10 +145,10 @@ public class Population {
 				genome.setFitness(adjustedFitness);
 				species.addAdjustedFitness(adjustedFitness);
 
-				if (fitness >= highestFitness) {
-					highestFitness = fitness;
-					fittestGenome = genome;
-				}
+//				if (fitness >= highestFitness) {
+//					highestFitness = fitness;
+//					fittestGenome = genome;
+//				}
 			}
 		}
 
@@ -151,7 +167,7 @@ public class Population {
 
 	private void breedPopulation() {
 
-		while (nextPopulation.size() < population.size()) {
+		while (nextPopulation.size() < Parameters.populationSize) {
 			Species species = selectRandomSpeciesBasedOnAdjustedFitness();
 
 			Genome child;
@@ -161,6 +177,11 @@ public class Population {
 				child = parent1.copy();
 			} else {
 				Genome parent2 = species.selectRandomGenomeBasedOnAdjustedFitness(random);
+				if (parent2.getFitness() > parent1.getFitness()) {
+					Genome tmp = parent1;
+					parent1 = parent2;
+					parent2 = tmp;
+				}
 				child = crossover(parent1, parent2);
 			}
 
@@ -180,7 +201,7 @@ public class Population {
 
 		for (Species species : this.species) {
 			runningAdjustedFitnessSum += species.getAdjustedFitness();
-			if (runningAdjustedFitnessSum > rnd) {
+			if (runningAdjustedFitnessSum >= rnd) {
 				return species;
 			}
 		}
@@ -198,12 +219,13 @@ public class Population {
 		return adjustedFitnessSum;
 	}
 
-	public Genome getFittestGenome() {
-		return fittestGenome;
-	}
-
-	public double getHighestFitness() {
-		return highestFitness;
+	public Genome getFittestGenome() {		
+		if (population.isEmpty()) {
+			throw new RuntimeException("Cannot get fittest genome as the population is empty");
+		}
+		
+		Collections.sort(population, (a, b) -> a.getFitness() < b.getFitness() ? 1 : a.getFitness() == b.getFitness() ? 0 : -1);
+		return population.get(0);
 	}
 
 	public int getGenerationNr() {

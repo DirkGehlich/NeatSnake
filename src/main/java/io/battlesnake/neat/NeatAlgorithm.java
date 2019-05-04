@@ -11,17 +11,11 @@ public class NeatAlgorithm {
 
 	private Random random;
 	private Population population;
-	private final int numInNodes;
-	private final int numOutNodes;
 
 	public NeatAlgorithm(int numInNodes, int numOutNodes) {
-
-		this.numInNodes = numInNodes;
-		this.numOutNodes = numOutNodes;
-
 		random = new Random();
 
-		Genome genome = new Genome(random, numOutNodes);
+		Genome genome = new Genome(random);
 
 		for (int i = 0; i < numInNodes; ++i) {
 			NodeGene node = new NodeGene(Type.Input, InnovationNrGenerator.getNext());
@@ -37,10 +31,10 @@ public class NeatAlgorithm {
 			genome.addNodeGene(node);
 		}
 
-		genome.getNodeGenes().stream().filter(n -> n.getType() != Type.Output).forEach(n -> {
+		genome.getNodeGenes().stream().filter(nIn -> nIn.getType() != Type.Output).forEach(nIn -> {
 			genome.getNodeGenes().stream().filter(nOut -> nOut.getType() == Type.Output).forEach(nOut -> {
-				float randomWeight = random.nextFloat() * 4 - 2;
-				ConnectionGene connection = new ConnectionGene(n.getInnovationNr(), nOut.getInnovationNr(),
+				float randomWeight = Parameters.minWeight + random.nextFloat() * (Parameters.maxWeight - Parameters.minWeight);
+				ConnectionGene connection = new ConnectionGene(nIn.getInnovationNr(), nOut.getInnovationNr(),
 						randomWeight, true, InnovationNrGenerator.getNext());
 				genome.addConnectionGene(connection);
 			});
@@ -49,14 +43,9 @@ public class NeatAlgorithm {
 		population = new Population(genome);
 	}
 
-	public void setInputsFittest(float[] inputs) {
-
-		population.getFittestGenome().setInputs(inputs);
-	}
-
-	public double[] calculateFittest() {
+	public double[] calculateFittest(float[] inputs) {
 		Genome fittestGenome = population.getFittestGenome();
-		return fittestGenome.calculate();
+		return fittestGenome.calculate(inputs);
 	}
 
 	public void createNewGeneration() {
