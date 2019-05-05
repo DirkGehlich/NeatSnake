@@ -36,7 +36,7 @@ class NeatAlgorithmTest {
 				double fitness = Math.pow((4-err), 2);
 				genome.setFitness(fitness);
 				
-				if (genome.getFitness() == 16) {
+				if (genome.getFitness() > 15.99) {
 					@SuppressWarnings("unused")
 					int foo = 42;
 				}
@@ -46,7 +46,7 @@ class NeatAlgorithmTest {
 			System.out.println(String.format("Generation: %d\tBest Fitness: %f", neat.getGeneratioNr(),
 					fittestGenome.getFitness()));
 			
-			if (fittestGenome.getFitness() == 16) {
+			if (fittestGenome.getFitness() > 15.99) {
 				break;
 			}
 			neat.createNewGeneration();

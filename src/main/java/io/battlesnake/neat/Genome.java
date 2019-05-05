@@ -306,11 +306,13 @@ public class Genome {
 
 		double[] outputs = new double[numOutNodes];
 
-		List<NodeGene> inputNodes = getNodeGenes().stream()
-				.filter(n -> n.getType() == Type.Input || n.getType() == Type.Bias).collect(Collectors.toList());
-		calculateOutputs(inputNodes);
-		List<NodeGene> outputNodes = getNodeGenes().stream().filter(n -> n.getType() == Type.Output)
-				.collect(Collectors.toList());
+		List<NodeGene> outputNodes = getNodeGenes().stream().filter(n -> n.getType() == Type.Output).collect(Collectors.toList());
+		calculatePreviousLayer(outputNodes);
+//		List<NodeGene> inputNodes = getNodeGenes().stream()
+//				.filter(n -> n.getType() == Type.Input || n.getType() == Type.Bias).collect(Collectors.toList());
+//		calculateOutputs(inputNodes);
+//		List<NodeGene> outputNodes = getNodeGenes().stream().filter(n -> n.getType() == Type.Output)
+//				.collect(Collectors.toList());
 
 		for (int i = 0; i < outputNodes.size(); ++i) {
 			outputs[i] = outputNodes.get(i).getActivation();
@@ -319,6 +321,32 @@ public class Genome {
 		return outputs;
 	}
 
+	private void calculatePreviousLayer(List<NodeGene> layer) {
+		List<NodeGene> previousLayer = new ArrayList<NodeGene>();
+		for (NodeGene node : layer) {
+			getConnectionGenes().stream()
+					.filter(c -> node.getInnovationNr() == c.getOutNodeInnovationNr() && c.isEnabled()).forEach(c -> {
+						NodeGene inNode = getNodeGenes().getByInnovatioNr(c.getInNodeInnovationNr());
+						if (!previousLayer.contains(inNode)) {
+							previousLayer.add(inNode);
+						}
+					});
+		}
+		
+		if (!previousLayer.isEmpty()) {
+			calculatePreviousLayer(previousLayer);
+		}
+		
+		for (NodeGene node : layer) {
+			getConnectionGenes().stream()
+			.filter(c -> node.getInnovationNr() == c.getOutNodeInnovationNr() && c.isEnabled()).forEach(c -> {
+				NodeGene inNode = getNodeGenes().getByInnovatioNr(c.getInNodeInnovationNr());
+				node.addWeightedInputSum(inNode.getActivation() * c.getWeight());
+			});		
+			node.activate();
+		}
+	}
+	
 	private void calculateOutputs(List<NodeGene> layer) {
 
 		List<NodeGene> nextLayer = new ArrayList<NodeGene>();

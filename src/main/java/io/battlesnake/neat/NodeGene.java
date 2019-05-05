@@ -66,8 +66,12 @@ public class NodeGene extends Gene {
 	
 	public void activate() {
 		
+		if (type == Type.Input || type == Type.Bias) {
+			return;
+		}
+		
 		activation = 1/(1 + Math.exp(-4.9 * weightedInputSum));
-		//weightedInputSum = 0;
+		weightedInputSum = 0;
 	}
 	
 	public void addWeightedInputSum(double weightedInputSum) {

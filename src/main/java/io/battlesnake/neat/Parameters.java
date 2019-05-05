@@ -9,7 +9,7 @@ public class Parameters {
 	public static float c2 = 1.0f;
 	public static float c3 = 0.4f;
 	public static float compatibilityThreshold = 3.0f;
-	public static int minNumberGenomesForBest = 0;
+	public static int minNumberGenomesForBest = 6;
 	public static float noCrossoverChange = 0.25f;
 	public static float weightMutationChance = 0.8f;
 	public static float enableGeneMutationChance = 0.25f;
