@@ -12,7 +12,8 @@ public class Genome {
 	private Random random = new Random();
 	private NodeGenes nodeGenes = new NodeGenes();
 	private ConnectionGenes connectionGenes = new ConnectionGenes();
-	private double fitness;
+	private double fitness = 0.0;
+	private double adjustedFitness = 0.0;
 	private int numOutNodes = 0;
 
 	public Genome(Random random) {
@@ -24,7 +25,6 @@ public class Genome {
 		this.random = genome.random;
 		this.nodeGenes = genome.nodeGenes.copy();
 		this.connectionGenes = genome.connectionGenes.copy();
-		this.fitness = genome.fitness;
 		this.numOutNodes = genome.numOutNodes;
 	}
 
@@ -39,7 +39,15 @@ public class Genome {
 	public void setFitness(double fitness) {
 		this.fitness = fitness;
 	}
+	
+	public double getAdjustedFitness() {
+		return adjustedFitness;
+	}
 
+	public void setAdjustedFitness(double adjustedFitness) {
+		this.adjustedFitness = adjustedFitness;
+	}
+	
 	public int getNumOutNodes() {
 		return numOutNodes;
 	}

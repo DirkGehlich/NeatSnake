@@ -56,7 +56,6 @@ public class Population {
 		removeEmptySpecies();
 		setAdjustedFitnessToGenomes();
 		removeWeakestGenomesFromEachSpecies();
-		// TODO: remove weakest genomes from species
 		addBestGenomesOfEachSpeciesToNewGeneration();
 		breedPopulation();
 		++generationNr;
@@ -142,13 +141,8 @@ public class Population {
 			for (Genome genome : species) {
 				double fitness = genome.getFitness();
 				double adjustedFitness = fitness / species.size();
-				genome.setFitness(adjustedFitness);
+				genome.setAdjustedFitness(adjustedFitness);
 				species.addAdjustedFitness(adjustedFitness);
-
-//				if (fitness >= highestFitness) {
-//					highestFitness = fitness;
-//					fittestGenome = genome;
-//				}
 			}
 		}
 
@@ -170,6 +164,7 @@ public class Population {
 		while (nextPopulation.size() < Parameters.populationSize) {
 			Species species = selectRandomSpeciesBasedOnAdjustedFitness();
 
+			// TODO: interspecies mating! (0.01)
 			Genome child;
 			Genome parent1 = species.selectRandomGenomeBasedOnAdjustedFitness(random);
 

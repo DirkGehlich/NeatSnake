@@ -35,14 +35,20 @@ class NeatAlgorithmTest {
 
 				double fitness = Math.pow((4-err), 2);
 				genome.setFitness(fitness);
-
+				
+				if (genome.getFitness() == 16) {
+					@SuppressWarnings("unused")
+					int foo = 42;
+				}
 			}
-
 			
 			Genome fittestGenome = population.getFittestGenome();
 			System.out.println(String.format("Generation: %d\tBest Fitness: %f", neat.getGeneratioNr(),
 					fittestGenome.getFitness()));
 			
+			if (fittestGenome.getFitness() == 16) {
+				break;
+			}
 			neat.createNewGeneration();
 
 		}
@@ -52,22 +58,22 @@ class NeatAlgorithmTest {
 		double[] outputs = fittestGenome.calculate(new float[] {0,0});
 		assertEquals(1,  outputs.length);
 		System.out.println("0,0 --> " + outputs[0]);
-		//assertEquals(0, outputs[0], 0.01f);
+		assertEquals(0, outputs[0], 0.01f);
 		
 		outputs = fittestGenome.calculate(new float[] {0,1});
 		assertEquals(1,  outputs.length);
 		System.out.println("0,1 --> " + outputs[0]);
-		//assertEquals(1, outputs[0], 0.01f);
+		assertEquals(1, outputs[0], 0.01f);
 
 		outputs = fittestGenome.calculate(new float[] {1,0});
 		assertEquals(1,  outputs.length);
 		System.out.println("1,0 --> " + outputs[0]);
-		//assertEquals(1, outputs[0], 0.01f);
+		assertEquals(1, outputs[0], 0.01f);
 
 		outputs = fittestGenome.calculate(new float[] {1,1});
 		assertEquals(1,  outputs.length);
 		System.out.println("1,1 --> " + outputs[0]);
-		//assertEquals(0, outputs[0], 0.01f);
+		assertEquals(0, outputs[0], 0.01f);
 	}
 
 }

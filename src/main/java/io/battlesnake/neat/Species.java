@@ -47,7 +47,7 @@ public class Species extends ArrayList<Genome> {
 	}
 	
 	public void sortSpeciesByFitness() {
-		Collections.sort(this, (a, b) -> a.getFitness() < b.getFitness() ? 1 : a.getFitness() == b.getFitness() ? 0 : -1);
+		Collections.sort(this, (a, b) -> a.getAdjustedFitness() < b.getAdjustedFitness() ? 1 : a.getAdjustedFitness() == b.getAdjustedFitness() ? 0 : -1);
 	}
 	
 	public Genome selectRandomGenomeBasedOnAdjustedFitness(Random random) {
@@ -57,7 +57,7 @@ public class Species extends ArrayList<Genome> {
 		double runningAdjustedFitnessSum = 0;
 		
 		for (Genome genome : this) {
-			runningAdjustedFitnessSum += genome.getFitness();
+			runningAdjustedFitnessSum += genome.getAdjustedFitness();
 			if (runningAdjustedFitnessSum > rnd) {
 				return genome;
 			}
@@ -70,7 +70,7 @@ public class Species extends ArrayList<Genome> {
 		double adjustedFitnessSum = 0;
 		
 		for (Genome genome : this) {
-			adjustedFitnessSum += genome.getFitness();
+			adjustedFitnessSum += genome.getAdjustedFitness();
 		}
 		
 		return adjustedFitnessSum;

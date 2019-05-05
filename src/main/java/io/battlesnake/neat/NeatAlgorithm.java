@@ -1,9 +1,6 @@
 package io.battlesnake.neat;
 
-import java.util.List;
 import java.util.Random;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 import io.battlesnake.neat.NodeGene.Type;
 

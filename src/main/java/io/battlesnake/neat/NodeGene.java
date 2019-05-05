@@ -63,9 +63,11 @@ public class NodeGene extends Gene {
 	public int hashCode() {
 		return this.innovationNr;
 	}
+	
 	public void activate() {
 		
 		activation = 1/(1 + Math.exp(-4.9 * weightedInputSum));
+		//weightedInputSum = 0;
 	}
 	
 	public void addWeightedInputSum(double weightedInputSum) {
