@@ -19,7 +19,6 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
-import org.neuroph.contrib.graphml.GraphmlExport;
 
 public class World extends JFrame implements KeyListener {
 
@@ -112,11 +111,7 @@ public class World extends JFrame implements KeyListener {
 		} else if (arg0.getKeyCode() == KeyEvent.VK_SPACE) {
 			population.setTraining(!population.isTraining());
 		} else if (arg0.getKeyChar() == 's') {
-			GraphmlExport ge = new GraphmlExport(population.getBestSnake().getBrain());
-			ge.parse();
-			ge.writeToFile("savednn.graphml");
-
-			population.getBestSnake().getBrain().save("savednn.nnet");
+			population.getBestSnake().getBrain().saveToFile();
 		} else if (arg0.getKeyChar() == 'l') {
 			population = new Population(Settings.BOARDSIZE_X, Settings.BOARDSIZE_Y, "savednn.nnet");
 		} else if (arg0.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -141,7 +136,7 @@ public class World extends JFrame implements KeyListener {
 				population.createNewGeneration();
 				enemySnakes.reset();
 			} else {
-				population.moveSnakes(enemySnakes.getBodyFields());
+				population.moveSnakes(enemySnakes);
 			}
 
 			world.update();

@@ -2,17 +2,16 @@ package io.battlesnake.logic;
 
 import java.util.LinkedList;
 
-import org.neuroph.nnet.MultiLayerPerceptron;
-
+import io.battlesnake.neat.Genome;
 import io.battlesnake.world.Board;
 import io.battlesnake.world.Field;
 import io.battlesnake.world.Snake;
 
 public class NeatSnake extends Snake {
 
-	protected MultiLayerPerceptron brain = null;
+	protected Genome brain = null;
 
-	private double[] inputs = new double[24];
+	private double[] inputs = new double[13];
 	protected Board board;
 
 	public NeatSnake(Snake snake) {
@@ -23,7 +22,7 @@ public class NeatSnake extends Snake {
 		super(body, health);
 	}
 
-	public void setBrain(MultiLayerPerceptron brain) {
+	public void setBrain(Genome brain) {
 		this.brain = brain;
 	}
 
@@ -38,49 +37,154 @@ public class NeatSnake extends Snake {
 		return nextField;
 	}
 
+	protected Field getMovementDirecton() {
+
+		Field head = body.getFirst();
+		Field firstTail = body.get(1);
+
+		Field direction = head.clone();
+		direction.substract(firstTail);
+
+		return direction;
+	}
+
+	protected Field getDirectionLeft(Field movementDirection) {
+		if (movementDirection.getX() == 0 && movementDirection.getY() == -1) {
+			return new Field(-1, 0);
+		} else if (movementDirection.getX() == 1 && movementDirection.getY() == 0) {
+			return new Field(0, -1);
+		} else if (movementDirection.getX() == 0 && movementDirection.getY() == 1) {
+			return new Field(1, 0);
+		} else if (movementDirection.getX() == -1 && movementDirection.getY() == 0) {
+			return new Field(0, 1);
+		}
+
+		return null;
+	}
+
+	protected Field getDirectionStraightLeft(Field movementDirection) {
+		if (movementDirection.getX() == 0 && movementDirection.getY() == -1) {
+			return new Field(-1, -1);
+		} else if (movementDirection.getX() == 1 && movementDirection.getY() == 0) {
+			return new Field(1, -1);
+		} else if (movementDirection.getX() == 0 && movementDirection.getY() == 1) {
+			return new Field(1, 1);
+		} else if (movementDirection.getX() == -1 && movementDirection.getY() == 0) {
+			return new Field(-1, 1);
+		}
+
+		return null;
+	}
+
+	protected Field getDirectionRight(Field movementDirection) {
+		if (movementDirection.getX() == 0 && movementDirection.getY() == -1) {
+			return new Field(1, 0);
+		} else if (movementDirection.getX() == 1 && movementDirection.getY() == 0) {
+			return new Field(0, 1);
+		} else if (movementDirection.getX() == 0 && movementDirection.getY() == 1) {
+			return new Field(-1, 0);
+		} else if (movementDirection.getX() == -1 && movementDirection.getY() == 0) {
+			return new Field(0, -1);
+		}
+
+		return null;
+	}
+
+	protected Field getDirectionStraightRight(Field movementDirection) {
+		if (movementDirection.getX() == 0 && movementDirection.getY() == -1) {
+			return new Field(1, -1);
+		} else if (movementDirection.getX() == 1 && movementDirection.getY() == 0) {
+			return new Field(1, 1);
+		} else if (movementDirection.getX() == 0 && movementDirection.getY() == 1) {
+			return new Field(-1, 1);
+		} else if (movementDirection.getX() == -1 && movementDirection.getY() == 0) {
+			return new Field(-1, -1);
+		}
+
+		return null;
+	}
+
 	protected void look() {
-		// Look in each of the 8 direction and find the nearest snake, food and wall
-		double[] info = getInfoFromDirection(new Field(-1, 0));
-		inputs[0] = info[0];
-		inputs[1] = info[1];
-		inputs[2] = info[2];
 
-		info = getInfoFromDirection(new Field(-1, -1));
-		inputs[3] = info[0];
-		inputs[4] = info[1];
-		inputs[5] = info[2];
+		Field directionStraight = getMovementDirecton();
+		Field directionLeft = getDirectionLeft(directionStraight);
+		Field directionRight = getDirectionRight(directionStraight);
+		Field directionStraightLeft = getDirectionStraightLeft(directionStraight);
+		Field directionStraightRight = getDirectionStraightRight(directionStraight);
 
-		info = getInfoFromDirection(new Field(0, -1));
-		inputs[6] = info[0];
-		inputs[7] = info[1];
-		inputs[8] = info[2];
+		inputs[0] = getDistanceToWall(directionStraight);
+		inputs[1] = getDistanceToWall(directionLeft);
+		inputs[2] = getDistanceToWall(directionRight);
 
-		info = getInfoFromDirection(new Field(1, -1));
-		inputs[9] = info[0];
-		inputs[10] = info[1];
-		inputs[11] = info[2];
+		inputs[3] = getDistanceToEnemy(directionStraight);
+		inputs[4] = getDistanceToEnemy(directionLeft);
+		inputs[5] = getDistanceToEnemy(directionRight);
+		inputs[6] = getDistanceToEnemy(directionStraightLeft);
+		inputs[7] = getDistanceToEnemy(directionStraightRight);
 
-		info = getInfoFromDirection(new Field(1, 0));
-		inputs[12] = info[0];
-		inputs[13] = info[1];
-		inputs[14] = info[2];
+		inputs[8] = getDistanceToFood(directionStraight);
+		inputs[9] = getDistanceToFood(directionLeft);
+		inputs[10] = getDistanceToFood(directionRight);
+		inputs[11] = getDistanceToFood(directionStraightLeft);
+		inputs[12] = getDistanceToFood(directionStraightRight);
+	}
 
-		info = getInfoFromDirection(new Field(1, 1));
-		inputs[15] = info[0];
-		inputs[16] = info[1];
-		inputs[17] = info[2];
+	private double getDistanceToWall(Field direction) {
+		int boardSizeX = board.getBoardSizeX();
+		int boardSizeY = board.getBoardSizeY();
 
-		info = getInfoFromDirection(new Field(0, 1));
-		inputs[18] = info[0];
-		inputs[19] = info[1];
-		inputs[20] = info[2];
+		Field tmpPos = getHeadPosition().clone();
+		tmpPos.add(direction);
 
-		info = getInfoFromDirection(new Field(-1, 1));
-		inputs[21] = info[0];
-		inputs[22] = info[1];
-		inputs[23] = info[2];
+		int distance = 1;
+		while (tmpPos.getX() < boardSizeX && tmpPos.getY() < boardSizeY && tmpPos.getX() >= 0 && tmpPos.getY() >= 0) {
+			++distance;
+			tmpPos.add(direction);
+		}
 
-//		evaluateNearestFood();
+		return 1.0 / distance;
+	}
+
+	private double getDistanceToEnemy(Field direction) {
+		int boardSizeX = board.getBoardSizeX();
+		int boardSizeY = board.getBoardSizeY();
+
+		Field tmpPos = getHeadPosition().clone();
+		tmpPos.add(direction);
+
+		int distance = 1;
+		while (tmpPos.getX() < boardSizeX && tmpPos.getY() < boardSizeY && tmpPos.getX() >= 0 && tmpPos.getY() >= 0) {
+			++distance;
+
+			if (board.getSnakePositions().contains(tmpPos)) {
+				return 1.0 / distance;
+			}
+
+			tmpPos.add(direction);
+		}
+
+		return 0;
+	}
+
+	private double getDistanceToFood(Field direction) {
+		int boardSizeX = board.getBoardSizeX();
+		int boardSizeY = board.getBoardSizeY();
+
+		Field tmpPos = getHeadPosition().clone();
+		tmpPos.add(direction);
+
+		int distance = 1;
+		while (tmpPos.getX() < boardSizeX && tmpPos.getY() < boardSizeY && tmpPos.getX() >= 0 && tmpPos.getY() >= 0) {
+			++distance;
+
+			if (board.getFoodPositions().contains(tmpPos)) {
+				return 1.0 / distance;
+			}
+
+			tmpPos.add(direction);
+		}
+
+		return 0;
 	}
 
 	public double[] getInfoFromDirection(Field direction) {
@@ -147,9 +251,7 @@ public class NeatSnake extends Snake {
 
 	public Field think() {
 
-		brain.setInput(inputs);
-		brain.calculate();
-		double[] output = brain.getOutput();
+		double[] output = brain.calculate(inputs);
 
 		double highestOutput = 0.0;
 
@@ -162,44 +264,19 @@ public class NeatSnake extends Snake {
 			}
 		}
 
-		// go left
+		// go straight
 		if (outputIdx == 0) {
-			return new Field(-1, 0);
+			return getMovementDirecton();
 		}
 
-		// go up
+		// go left
 		else if (outputIdx == 1) {
-			return new Field(0, -1);
+			return getDirectionLeft(getMovementDirecton());
 		}
 
 		// go right
-		else if (outputIdx == 2) {
-			return new Field(1, 0);
-		}
-
-		// go down
 		else {
-			return new Field(0, 1);
-		}
-
-	}
-
-	protected void evaluateNearestFood() {
-
-		double nearestFood = 0.0;
-		int nearestFoodIdx = -1;
-
-		for (int i = 0; i < inputs.length - 1; i += 3) {
-			if (inputs[i + 2] < 1.0 && inputs[i] > nearestFood) {
-				nearestFood = inputs[i];
-				nearestFoodIdx = i;
-			}
-
-			inputs[i] = 0;
-		}
-
-		if (nearestFoodIdx >= 0) {
-			inputs[nearestFoodIdx] = 1.0;
+			return getDirectionRight(getMovementDirecton());
 		}
 	}
 }

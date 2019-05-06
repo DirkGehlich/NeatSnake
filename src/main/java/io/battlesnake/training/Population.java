@@ -5,9 +5,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
-import org.neuroph.core.NeuralNetwork;
-import org.neuroph.nnet.MultiLayerPerceptron;
-
+import io.battlesnake.neat.Genome;
+import io.battlesnake.neat.NeatAlgorithm;
 import io.battlesnake.world.Board;
 import io.battlesnake.world.Field;
 
@@ -17,7 +16,6 @@ public class Population {
 	private final int BOARD_SIZE_X;
 	private final int BOARD_SIZE_Y;
 	List<TrainingsSnake> snakes = new ArrayList<TrainingsSnake>();
-	private int generationNo = 1;
 	Random random = new Random();
 	TrainingsSnake bestSnake = null;
 	private long globalBestFitness = 0;
@@ -26,6 +24,7 @@ public class Population {
 	private boolean training = true;
 	private int localMostMoves = 0;
 	private int localBiggestLength = 0;
+	private NeatAlgorithm neat;
 
 	private List<Integer> lifetimeHistory = new ArrayList<Integer>();
 	private List<Integer> tailLengthHistory = new ArrayList<Integer>();
@@ -34,8 +33,10 @@ public class Population {
 		this.BOARD_SIZE_X = boardSizeX;
 		this.BOARD_SIZE_Y = boardSizeY;
 
-		for (int i = 0; i < Settings.POPULATION_SIZE; ++i) {
-			TrainingsSnake snake = new TrainingsSnake(BOARD_SIZE_X, BOARD_SIZE_Y, createInitialBody());
+		// TODO: change to relative direction to reduce number of inputs and outputs
+		neat = new NeatAlgorithm(13, 3);
+		for (Genome genome : neat.getPopulation().getPopulation()) {
+			TrainingsSnake snake = new TrainingsSnake(BOARD_SIZE_X, BOARD_SIZE_Y, createInitialBody(), genome);
 			snake.generateFood();
 			snakes.add(snake);
 		}
@@ -44,10 +45,11 @@ public class Population {
 	public Population(int boardSizeX, int boardSizeY, String fileName) {
 		this.BOARD_SIZE_X = boardSizeX;
 		this.BOARD_SIZE_Y = boardSizeY;
-
-		MultiLayerPerceptron brain = (MultiLayerPerceptron) NeuralNetwork.createFromFile(fileName);
-		for (int i = 0; i < Settings.POPULATION_SIZE; ++i) {
-			TrainingsSnake snake = new TrainingsSnake(BOARD_SIZE_X, BOARD_SIZE_Y, createInitialBody(), brain);
+		
+		Genome brain = Genome.loadFromFile();
+		neat = new NeatAlgorithm(brain);
+		for (Genome genome : neat.getPopulation().getPopulation()) {
+			TrainingsSnake snake = new TrainingsSnake(BOARD_SIZE_X, BOARD_SIZE_Y, createInitialBody(), genome);
 			snake.generateFood();
 			snakes.add(snake);
 		}
@@ -76,13 +78,13 @@ public class Population {
 		return true;
 	}
 
-	public void moveSnakes(List<Field> enemySnakesCoords) {
+	public void moveSnakes(EnemySnakes enemySnakes) {
 
-		Board board = new Board(BOARD_SIZE_X, BOARD_SIZE_Y, enemySnakesCoords);
+		Board board = new Board(BOARD_SIZE_X, BOARD_SIZE_Y, enemySnakes.getBodyFields());
 
 		for (TrainingsSnake snake : snakes) {
 			if (!snake.isDead()) {
-				snake.updateEnvironment(enemySnakesCoords);
+				snake.updateEnvironment(enemySnakes);
 
 				Field direction = snake.evaluateNextMove(board);
 				snake.moveIn(direction);
@@ -96,70 +98,18 @@ public class Population {
 	}
 
 	public void createNewGeneration() {
-		// Select two parents based on fitness
-		// crossover the two parents into a new child
-		// mutate that childs brain
-
+		
 		calculateFitness();
-
-		List<TrainingsSnake> newGeneration = new ArrayList<TrainingsSnake>();
-
 		setBestSnake();
-
-		// TODO: use average fitness, or average of top 10% of snakes
-		long bestFitness = bestSnake.getFitness();
-		if (bestFitness <= 100000)
-			MUTATIONRATE = 0.2;
-		if (bestFitness > 100000)
-			MUTATIONRATE = 0.1;
-		if (bestFitness > 500000)
-			MUTATIONRATE = 0.05;
-		if (bestFitness > 1000000)
-			MUTATIONRATE = 0.02;
-		if (bestFitness > 5000000)
-			MUTATIONRATE = 0.01;
-
-		TrainingsSnake bestSnake = this.bestSnake.copy();
-		bestSnake.generateFood();
-		newGeneration.add(bestSnake);
-
-		for (int i = 1; i < Settings.POPULATION_SIZE; ++i) {
-
-			TrainingsSnake parent1 = selectParent();
-			TrainingsSnake parent2 = selectParent();
-			TrainingsSnake child = crossover(parent1, parent2);
-			child.mutate(MUTATIONRATE);
-			child.generateFood();
-			newGeneration.add(child);
-		}
-
+		neat.createNewGeneration();
 		snakes.clear();
-		snakes.addAll(newGeneration);
-
-		generationNo++;
-
+		for (Genome genome : neat.getPopulation().getPopulation()) {
+			TrainingsSnake snake = new TrainingsSnake(BOARD_SIZE_X, BOARD_SIZE_Y, createInitialBody(), genome);
+			snake.generateFood();
+			snakes.add(snake);
+		}
 	}
-
-	public TrainingsSnake getBestSnake() {
-		return bestSnake;
-	}
-
-	public long getGlobalBestFitness() {
-		return globalBestFitness;
-	}
-
-	public int getGlobalMostMoves() {
-		return globalMostMoves;
-	}
-
-	public int getGenerationNo() {
-		return generationNo;
-	}
-
-	public int getGlobalBiggestLength() {
-		return globalBiggestLength;
-	}
-
+	
 	private void setBestSnake() {
 
 		double fitness = 0;
@@ -198,57 +148,32 @@ public class Population {
 			globalBiggestLength = localBiggestLength;
 		}
 	}
+	
+	public TrainingsSnake getBestSnake() {
+		return bestSnake;
+	}
+
+	public long getGlobalBestFitness() {
+		return globalBestFitness;
+	}
+
+	public int getGlobalMostMoves() {
+		return globalMostMoves;
+	}
+
+	public int getGenerationNo() {
+		return neat.getGeneratioNr();
+	}
+
+	public int getGlobalBiggestLength() {
+		return globalBiggestLength;
+	}
 
 	private void calculateFitness() {
 
 		for (TrainingsSnake snake : snakes) {
 			snake.calculateFitness();
 		}
-	}
-
-	private TrainingsSnake selectParent() {
-
-		int fitnessSum = 0;
-
-		for (TrainingsSnake snake : snakes) {
-			fitnessSum += snake.getFitness();
-		}
-
-		int rndFitness = random.nextInt(fitnessSum);
-
-		int runningSum = 0;
-		for (TrainingsSnake snake : snakes) {
-			runningSum += snake.getFitness();
-			if (runningSum >= rndFitness) {
-
-				return snake;
-			}
-		}
-
-		return null;
-	}
-
-	private TrainingsSnake crossover(TrainingsSnake parent1, TrainingsSnake parent2) {
-
-		TrainingsSnake child = parent1.copy();
-
-		Double[] weightsParent1 = parent1.getBrain().getWeights();
-		Double[] weightsParent2 = parent2.getBrain().getWeights();
-		double[] weightsChild = new double[weightsParent2.length];
-
-		int maxIdxParent1 = random.nextInt(weightsParent1.length);
-		for (int i = 0; i <= maxIdxParent1; ++i) {
-			weightsChild[i] = weightsParent1[i];
-		}
-
-		if (maxIdxParent1 < weightsParent2.length - 2) {
-			for (int i = maxIdxParent1 + 1; i < weightsParent2.length; ++i) {
-				weightsChild[i] = weightsParent2[i];
-			}
-		}
-
-		child.getBrain().setWeights(weightsChild);
-		return child;
 	}
 
 	public boolean isTraining() {

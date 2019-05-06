@@ -15,19 +15,19 @@ class NeatAlgorithmTest {
 		for (int i = 0; i < 1000 && !done; ++i) {
 			for (Genome genome : population.getPopulation()) {
 
-				double[] outputs = genome.calculate(new float[] { 0, 0 });
+				double[] outputs = genome.calculate(new double[] { 0, 0 });
 				assertEquals(1, outputs.length);
 				double err00 = Math.abs(0 - outputs[0]);
 
-				outputs = genome.calculate(new float[] { 1, 0 });
+				outputs = genome.calculate(new double[] { 1, 0 });
 				assertEquals(1, outputs.length);
 				double err10 = Math.abs(1 - outputs[0]);
 
-				outputs = genome.calculate(new float[] { 0, 1 });
+				outputs = genome.calculate(new double[] { 0, 1 });
 				assertEquals(1, outputs.length);
 				double err01 = Math.abs(1 - outputs[0]);
 
-				outputs = genome.calculate(new float[] { 1, 1 });
+				outputs = genome.calculate(new double[] { 1, 1 });
 				assertEquals(1, outputs.length);
 				double err11 = Math.abs(0 - outputs[0]);
 
@@ -55,22 +55,22 @@ class NeatAlgorithmTest {
 		
 		Genome fittestGenome = population.getFittestGenome();
 		
-		double[] outputs = fittestGenome.calculate(new float[] {0,0});
+		double[] outputs = fittestGenome.calculate(new double[] {0,0});
 		assertEquals(1,  outputs.length);
 		System.out.println("0,0 --> " + outputs[0]);
 		assertEquals(0, outputs[0], 0.01f);
 		
-		outputs = fittestGenome.calculate(new float[] {0,1});
+		outputs = fittestGenome.calculate(new double[] {0,1});
 		assertEquals(1,  outputs.length);
 		System.out.println("0,1 --> " + outputs[0]);
 		assertEquals(1, outputs[0], 0.01f);
 
-		outputs = fittestGenome.calculate(new float[] {1,0});
+		outputs = fittestGenome.calculate(new double[] {1,0});
 		assertEquals(1,  outputs.length);
 		System.out.println("1,0 --> " + outputs[0]);
 		assertEquals(1, outputs[0], 0.01f);
 
-		outputs = fittestGenome.calculate(new float[] {1,1});
+		outputs = fittestGenome.calculate(new double[] {1,1});
 		assertEquals(1,  outputs.length);
 		System.out.println("1,1 --> " + outputs[0]);
 		assertEquals(0, outputs[0], 0.01f);

@@ -1,10 +1,11 @@
 package io.battlesnake.neat;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ConnectionGenes extends ArrayList<ConnectionGene> {
+public class ConnectionGenes extends ArrayList<ConnectionGene>  implements Serializable {
 
 	/**
 	 * 

@@ -39,8 +39,14 @@ public class NeatAlgorithm {
 
 		population = new Population(genome);
 	}
+	
+	public NeatAlgorithm(Genome initialGenome) {
+		random = new Random();
 
-	public double[] calculateFittest(float[] inputs) {
+		population = new Population(initialGenome);
+	}
+
+	public double[] calculateFittest(double[] inputs) {
 		Genome fittestGenome = population.getFittestGenome();
 		return fittestGenome.calculate(inputs);
 	}

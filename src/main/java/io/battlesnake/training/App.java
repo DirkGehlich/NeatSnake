@@ -1,5 +1,6 @@
 package io.battlesnake.training;
 
+import org.apache.log4j.BasicConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,8 +11,9 @@ public class App {
 	private static final Logger LOG = LoggerFactory.getLogger(App.class.getName());
 
 	public static void main(String[] args) {
+		BasicConfigurator.configure();
 		App app = new App();
-		app.trainSnakes();
+		app.trainSnakes();		
 	}
 
 	public App() {
@@ -31,7 +33,7 @@ public class App {
 				logBestSnakeStats();
 				saveBestSnake();
 			} else {
-				population.moveSnakes(enemySnakes.getBodyFields());
+				population.moveSnakes(enemySnakes);
 			}
 		}
 	}
@@ -51,7 +53,7 @@ public class App {
 	public void saveBestSnake() {
 
 		if (population.getGenerationNo() % 500 == 0) {
-			population.getBestSnake().getBrain().save("savednn_" + population.getGenerationNo() + ".nnet");
+			population.getBestSnake().getBrain().saveToFile("_" + String.valueOf(population.getGenerationNo()));
 		}
 	}
 }

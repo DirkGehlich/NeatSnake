@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-import org.neuroph.core.NeuralNetwork;
-import org.neuroph.nnet.MultiLayerPerceptron;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +11,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.battlesnake.logic.NeatSnake;
+import io.battlesnake.neat.Genome;
 import io.battlesnake.world.Board;
 import io.battlesnake.world.Field;
 import spark.Request;
@@ -25,12 +24,10 @@ public class GameService {
 	private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
 
 	private static NeatSnake snake;
-	private static MultiLayerPerceptron brain;
+	private static Genome brain;
 
 	public GameService() {
-		brain = (MultiLayerPerceptron) NeuralNetwork.createFromFile("savednn.nnet");
-		for (double weight : brain.getWeights())
-			LOG.info("Weight: " + weight);
+		brain = Genome.loadFromFile();
 	}
 
 	/**

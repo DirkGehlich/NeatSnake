@@ -32,6 +32,11 @@ public class Field implements Cloneable {
 		this.x += toAdd.x;
 		this.y += toAdd.y;
 	}
+	
+	public void substract(Field toSubstract) {
+		this.x -= toSubstract.x;
+		this.y -= toSubstract.y;
+	}
 
 	public int distanceTo(Field other) {
 		return Math.abs(x - other.x) + Math.abs(y - other.y);

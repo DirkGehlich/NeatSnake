@@ -1,8 +1,9 @@
 package io.battlesnake.neat;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class NodeGenes extends ArrayList<NodeGene> {
+public class NodeGenes extends ArrayList<NodeGene>  implements Serializable {
 
 	public NodeGenes() {
 		

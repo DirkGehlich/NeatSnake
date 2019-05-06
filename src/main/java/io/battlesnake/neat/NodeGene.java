@@ -1,6 +1,13 @@
 package io.battlesnake.neat;
 
-public class NodeGene extends Gene {
+import java.io.Serializable;
+
+public class NodeGene extends Gene  implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	public enum Type {
 		Input, Hidden, Output, Bias;

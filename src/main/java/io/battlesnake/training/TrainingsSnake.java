@@ -5,12 +5,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
-import org.neuroph.nnet.MultiLayerPerceptron;
-import org.neuroph.util.NeuralNetworkType;
-import org.neuroph.util.TransferFunctionType;
-import org.neuroph.util.random.RangeRandomizer;
-
 import io.battlesnake.logic.NeatSnake;
+import io.battlesnake.neat.Genome;
 import io.battlesnake.world.Board;
 import io.battlesnake.world.Field;
 
@@ -24,54 +20,25 @@ public class TrainingsSnake extends NeatSnake {
 	private long fitness = 0;
 	private int lifetime = 0;
 	private List<Field> food = new ArrayList<Field>();
-	private List<Field> enemySnakes = new ArrayList<Field>();
+	private EnemySnakes enemySnakes = new EnemySnakes();
+	private int killedSnakes = 0;
 
-	private RangeRandomizer randomizer = new RangeRandomizer(-1.0, 1.0);
 	private Random random = new Random();
 
 	public TrainingsSnake(int boardSizeX, int boardSizeY, LinkedList<Field> body) {
 		super(body, Settings.MAXHEALTH);
 		BOARD_SIZE_X = boardSizeX;
 		BOARD_SIZE_Y = boardSizeY;
-
-		createBrain();
-		brain.setNetworkType(NeuralNetworkType.MULTI_LAYER_PERCEPTRON);
-		brain.randomizeWeights(randomizer);
 	}
 
-	public TrainingsSnake(int boardSizeX, int boardSizeY, LinkedList<Field> body, MultiLayerPerceptron brain) {
+	public TrainingsSnake(int boardSizeX, int boardSizeY, LinkedList<Field> body, Genome brain) {
 		super(body, Settings.MAXHEALTH);
-		BOARD_SIZE_X = boardSizeX;
-		BOARD_SIZE_Y = boardSizeY;
-
-		createBrain();
-		Double[] parentWeights = brain.getWeights();
-		double[] weights = new double[parentWeights.length];
-
-		for (int i = 0; i < parentWeights.length; ++i) {
-			weights[i] = parentWeights[i];
-		}
-		this.brain.setWeights(weights);
+		this.BOARD_SIZE_X = boardSizeX;
+		this.BOARD_SIZE_Y = boardSizeY;
+		this.brain = brain;
 	}
 
-	public void createBrain() {
-		this.brain = new MultiLayerPerceptron(TransferFunctionType.SIGMOID, 24, 18, 4);
-	}
-
-	public TrainingsSnake copy() {
-
-		// TODO: put somewhere else
-		LinkedList<Field> body = new LinkedList<Field>();
-		body.add(new Field(5, 4));
-		body.add(new Field(5, 5));
-		body.add(new Field(5, 6));
-
-		TrainingsSnake snake = new TrainingsSnake(BOARD_SIZE_X, BOARD_SIZE_Y, body, brain);
-
-		return snake;
-	}
-
-	public void updateEnvironment(List<Field> enemySnakes) {
+	public void updateEnvironment(EnemySnakes enemySnakes) {
 		this.enemySnakes = enemySnakes;
 	}
 
@@ -144,9 +111,15 @@ public class TrainingsSnake extends NeatSnake {
 		}
 
 		// Hit enemy snake
-		for (Field enemySnakeCoord : enemySnakes) {
-			if (head.equals(enemySnakeCoord)) {
-				kill();
+		for (EnemySnake enemySnake : enemySnakes) {
+			for (int i=1; i<enemySnake.getBody().size(); ++i) {
+				if (head.equals(enemySnake.getBody().get(i))) {
+					kill();
+				}
+			}
+			
+			if (head.equals(enemySnake.getHeadPosition()) && body.size() > enemySnake.getBody().size()) {
+				++killedSnakes;
 			}
 		}
 
@@ -157,31 +130,6 @@ public class TrainingsSnake extends NeatSnake {
 				kill();
 			}
 		}
-	}
-
-	public void mutate(double mutationRate) {
-
-//		GaussianRandomizer randomizer = new GaussianRandomizer(0.0, 0.1);
-//		brain.randomizeWeights(randomizer);
-		Double[] weights = brain.getWeights();
-		double[] adjustedWeights = new double[weights.length];
-
-		for (int i = 0; i < weights.length; ++i) {
-			double weight = weights[i];
-			double mutateRnd = random.nextDouble();
-			if (mutateRnd < mutationRate) {
-				double offset = random.nextGaussian() / 5.0;
-				weight += offset;
-//				weight = random.nextGaussian(); // TODO: remove
-				if (weight > 1.0)
-					weight = 1.0;
-				if (weight < -1.0)
-					weight = -1.0;
-			}
-			adjustedWeights[i] = weight;
-		}
-
-		brain.setWeights(adjustedWeights);
 	}
 
 	private void kill() {
@@ -198,7 +146,8 @@ public class TrainingsSnake extends NeatSnake {
 		int len = body.size();
 
 //		fitness = (long)Math.floor(Math.pow(len - 2, 2)) * lifetime;
-		fitness = (long) len * lifetime * lifetime;
+		fitness = (long) len * lifetime * lifetime * (killedSnakes + 1);
+		brain.setFitness(fitness);
 
 //		
 //		if (len < 10) {
@@ -212,7 +161,7 @@ public class TrainingsSnake extends NeatSnake {
 //		}
 	}
 
-	public MultiLayerPerceptron getBrain() {
+	public Genome getBrain() {
 		return brain;
 	}
 

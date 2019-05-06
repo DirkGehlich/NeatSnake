@@ -245,7 +245,7 @@ class GenomeTest {
 	@Test
 	void calculate_XOR_1hiddenLayer_2HiddenNeurons_1Bias_Test0_0() {
 		Genome genome = createXORGenome();		
-		float[] inputs = new float[] {0,0};
+		double[] inputs = new double[] {0,0};
 		
 		double[] outputs = genome.calculate(inputs);
 		
@@ -256,7 +256,7 @@ class GenomeTest {
 	@Test
 	void calculate_XOR_1hiddenLayer_2HiddenNeurons_1Bias_Test1_0() {
 		Genome genome = createXORGenome();		
-		float[] inputs = new float[] {1,0};
+		double[] inputs = new double[] {1,0};
 		
 		double[] outputs = genome.calculate(inputs);
 		
@@ -267,7 +267,7 @@ class GenomeTest {
 	@Test
 	void calculate_XOR_1hiddenLayer_2HiddenNeurons_1Bias_Test0_1() {
 		Genome genome = createXORGenome();		
-		float[] inputs = new float[] {0,1};
+		double[] inputs = new double[] {0,1};
 		
 		double[] outputs = genome.calculate(inputs);
 		
@@ -278,7 +278,7 @@ class GenomeTest {
 	@Test
 	void calculate_XOR_1hiddenLayer_2HiddenNeurons_1Bias_Test1_1() {
 		Genome genome = createXORGenome();		
-		float[] inputs = new float[] {1,1};
+		double[] inputs = new double[] {1,1};
 		
 		double[] outputs = genome.calculate(inputs);
 		

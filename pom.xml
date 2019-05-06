@@ -59,18 +59,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.neuroph</groupId>
-			<artifactId>neuroph-core</artifactId>
-			<version>2.94</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.neuroph</groupId>
-			<artifactId>neuroph-contrib</artifactId>
-			<version>2.94</version>
-		</dependency>
-
-		<dependency>
 			<groupId>org.jfree</groupId>
 			<artifactId>jfreechart</artifactId>
 			<version>1.0.14</version>
@@ -80,6 +68,18 @@
 			<artifactId>mockito-core</artifactId>
 			<version>2.27.0</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-simple -->
+		<dependency>
+       <groupId>org.slf4j</groupId>
+       <artifactId>slf4j-api</artifactId>
+       <version>1.7.5</version>
+   </dependency>
+   <dependency>
+       <groupId>org.slf4j</groupId>
+       <artifactId>slf4j-log4j12</artifactId>
+       <version>1.7.5</version>
+   </dependency>
+
 	</dependencies>
 
 	<build>

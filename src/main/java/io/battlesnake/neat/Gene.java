@@ -1,7 +1,13 @@
 package io.battlesnake.neat;
 
-public class Gene {
+import java.io.Serializable;
 
+public class Gene  implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	protected int innovationNr;
 
 	

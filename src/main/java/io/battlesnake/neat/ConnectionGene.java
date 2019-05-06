@@ -1,7 +1,13 @@
 package io.battlesnake.neat;
 
-public class ConnectionGene extends Gene {
+import java.io.Serializable;
 
+public class ConnectionGene extends Gene  implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private int inNodeInnovationNr;
 	private int outNodeInnovationNr;
 	private float weight;

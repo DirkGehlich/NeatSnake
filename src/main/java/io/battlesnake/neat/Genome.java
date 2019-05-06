@@ -1,5 +1,10 @@
 package io.battlesnake.neat;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -7,8 +12,12 @@ import java.util.stream.Collectors;
 
 import io.battlesnake.neat.NodeGene.Type;
 
-public class Genome {
+public class Genome implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private Random random = new Random();
 	private NodeGenes nodeGenes = new NodeGenes();
 	private ConnectionGenes connectionGenes = new ConnectionGenes();
@@ -39,7 +48,7 @@ public class Genome {
 	public void setFitness(double fitness) {
 		this.fitness = fitness;
 	}
-	
+
 	public double getAdjustedFitness() {
 		return adjustedFitness;
 	}
@@ -47,7 +56,7 @@ public class Genome {
 	public void setAdjustedFitness(double adjustedFitness) {
 		this.adjustedFitness = adjustedFitness;
 	}
-	
+
 	public int getNumOutNodes() {
 		return numOutNodes;
 	}
@@ -112,7 +121,7 @@ public class Genome {
 		int triesLeft = 10;
 		while (triesLeft > 0) {
 			--triesLeft;
-			
+
 			node1 = nodeGenes.get(random.nextInt(nodeGenes.size()));
 			node2 = nodeGenes.get(random.nextInt(nodeGenes.size()));
 			int node1InnovationNr = node1.getInnovationNr();
@@ -132,7 +141,7 @@ public class Genome {
 					&& (node2.getType() == Type.Bias || node2.getType() == Type.Input)) {
 				continue;
 			}
-			
+
 			if (node1.getType() == Type.Output && node2.getType() == Type.Output) {
 				continue;
 			}
@@ -150,7 +159,7 @@ public class Genome {
 			if (!this.connectionGenes.isNodeConnected(node1.getInnovationNr(), node2.getInnovationNr())) {
 				break;
 			}
-			
+
 		}
 
 		if (triesLeft == 0) {
@@ -289,7 +298,7 @@ public class Genome {
 		}
 	}
 
-	private void setInputs(float[] inputs) {
+	private void setInputs(double[] inputs) {
 		List<NodeGene> inputNodes = getNodeGenes().stream().filter(g -> g.getType() == Type.Input)
 				.collect(Collectors.toList());
 		if (inputs.length != inputNodes.size()) {
@@ -301,18 +310,14 @@ public class Genome {
 		}
 	}
 
-	public double[] calculate(float[] inputs) {
+	public double[] calculate(double[] inputs) {
 		setInputs(inputs);
 
 		double[] outputs = new double[numOutNodes];
 
-		List<NodeGene> outputNodes = getNodeGenes().stream().filter(n -> n.getType() == Type.Output).collect(Collectors.toList());
+		List<NodeGene> outputNodes = getNodeGenes().stream().filter(n -> n.getType() == Type.Output)
+				.collect(Collectors.toList());
 		calculatePreviousLayer(outputNodes);
-//		List<NodeGene> inputNodes = getNodeGenes().stream()
-//				.filter(n -> n.getType() == Type.Input || n.getType() == Type.Bias).collect(Collectors.toList());
-//		calculateOutputs(inputNodes);
-//		List<NodeGene> outputNodes = getNodeGenes().stream().filter(n -> n.getType() == Type.Output)
-//				.collect(Collectors.toList());
 
 		for (int i = 0; i < outputNodes.size(); ++i) {
 			outputs[i] = outputNodes.get(i).getActivation();
@@ -332,43 +337,18 @@ public class Genome {
 						}
 					});
 		}
-		
+
 		if (!previousLayer.isEmpty()) {
 			calculatePreviousLayer(previousLayer);
 		}
-		
-		for (NodeGene node : layer) {
-			getConnectionGenes().stream()
-			.filter(c -> node.getInnovationNr() == c.getOutNodeInnovationNr() && c.isEnabled()).forEach(c -> {
-				NodeGene inNode = getNodeGenes().getByInnovatioNr(c.getInNodeInnovationNr());
-				node.addWeightedInputSum(inNode.getActivation() * c.getWeight());
-			});		
-			node.activate();
-		}
-	}
-	
-	private void calculateOutputs(List<NodeGene> layer) {
 
-		List<NodeGene> nextLayer = new ArrayList<NodeGene>();
 		for (NodeGene node : layer) {
-			double input = node.getActivation();
 			getConnectionGenes().stream()
-					.filter(c -> node.getInnovationNr() == c.getInNodeInnovationNr() && c.isEnabled()).forEach(c -> {
-						NodeGene outNode = getNodeGenes().getByInnovatioNr(c.getOutNodeInnovationNr());
-						if (!nextLayer.contains(outNode)) {
-							nextLayer.add(outNode);
-						}
-						double weightedSum = input * c.getWeight();
-						outNode.addWeightedInputSum(weightedSum);
+					.filter(c -> node.getInnovationNr() == c.getOutNodeInnovationNr() && c.isEnabled()).forEach(c -> {
+						NodeGene inNode = getNodeGenes().getByInnovatioNr(c.getInNodeInnovationNr());
+						node.addWeightedInputSum(inNode.getActivation() * c.getWeight());
 					});
-		}
-
-		for (NodeGene n : nextLayer) {
-			n.activate();
-		}
-
-		if (!nextLayer.isEmpty()) {
-			calculateOutputs(nextLayer);
+			node.activate();
 		}
 	}
 
@@ -377,6 +357,34 @@ public class Genome {
 			float rndWeight = Parameters.minWeight + random.nextFloat() * (Parameters.maxWeight - Parameters.minWeight);
 			connection.setWeight(rndWeight);
 		}
+	}
+
+	public void saveToFile() {
+		saveToFile("");
+	}
+	
+	public void saveToFile(String postfix) {
+		try (FileOutputStream fout = new FileOutputStream("savednn" + postfix + ".txt", false);
+				ObjectOutputStream oos = new ObjectOutputStream(fout);) {
+			oos.writeObject(this);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
+	
+	public static Genome loadFromFile() {
+		Genome genome = null;
+		ObjectInputStream objectinputstream = null;
+		try {
+		    FileInputStream streamIn = new FileInputStream("savednn.txt");
+		    objectinputstream = new ObjectInputStream(streamIn);
+		    genome = (Genome) objectinputstream.readObject();
+		    objectinputstream .close();
+		} catch (Exception e) {
+		    e.printStackTrace();
+		}
+		
+		return genome;
 	}
 
 }
