@@ -21,11 +21,13 @@ public class Board {
 		snakes.forEach(snake -> snakePositions.addAll(snake.body));
 	}
 
-	public Board(int boardSizeX, int boardSizeY, List<Field> snakePositions) {
+	public Board(int boardSizeX, int boardSizeY, List<Snake> snakes) {
 		super();
 		this.BOARD_SIZE_X = boardSizeX;
 		this.BOARD_SIZE_Y = boardSizeY;
-		this.snakePositions = snakePositions;
+		this.snakes = snakes;
+
+		snakes.forEach(snake -> snakePositions.addAll(snake.body));
 	}
 
 	public int getBoardSizeX() {

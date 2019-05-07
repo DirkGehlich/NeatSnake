@@ -192,6 +192,11 @@ public class NeatSnake extends Snake {
 
 			// TODO: if it is the head position of the snake and only one space between my head and enemys head then treat it as 1.0, because the enemy could move to the same position
 			if (board.getSnakePositions().contains(tmpPos)) {
+				for (Snake enemy : board.getSnakes()) {
+					if (enemy.getBody().get(0) == tmpPos) {
+						return 1.0;
+					}
+				}
 				return 1.0 / distance;
 			}
 

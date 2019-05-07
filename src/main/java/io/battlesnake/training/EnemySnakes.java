@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.battlesnake.world.Field;
+import io.battlesnake.world.Snake;
 
 public class EnemySnakes extends ArrayList<EnemySnake> {
 
@@ -33,5 +34,13 @@ public class EnemySnakes extends ArrayList<EnemySnake> {
 		forEach(enemySnake -> bodyFields.addAll(enemySnake.getBody()));
 
 		return bodyFields;
+	}
+	
+	public List<Snake> getBaseSnakes() {
+		List<Snake> baseSnakes = new ArrayList<Snake>();
+
+		baseSnakes.addAll(this);
+
+		return baseSnakes;
 	}
 }

@@ -80,7 +80,7 @@ public class Population {
 
 	public void moveSnakes(EnemySnakes enemySnakes) {
 
-		Board board = new Board(BOARD_SIZE_X, BOARD_SIZE_Y, enemySnakes.getBodyFields());
+		Board board = new Board(BOARD_SIZE_X, BOARD_SIZE_Y, enemySnakes.getBaseSnakes());
 
 		for (TrainingsSnake snake : snakes) {
 			if (!snake.isDead()) {
