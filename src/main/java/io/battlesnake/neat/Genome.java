@@ -93,6 +93,7 @@ public class Genome implements Serializable {
 	 */
 	public void performWeightMutation() {
 		for (ConnectionGene connection : connectionGenes) {
+			// TODO: use gausian with some weight mutation power instead of 1.0 as standard deviation?
 			float rnd = Parameters.minWeight + random.nextFloat() * (Parameters.maxWeight - Parameters.minWeight);
 			if (random.nextFloat() < Parameters.weightPerturbingChance) {
 				float newWeight = connection.getWeight() + rnd * Parameters.weightPerturbingStep;
@@ -296,6 +297,8 @@ public class Genome implements Serializable {
 		if (random.nextFloat() < Parameters.addConnectionMutationChance) {
 			performAddConnectionMutation();
 		}
+		
+		// TODO: remove connection mutation (remove node if not in and out node connected anymore?)
 	}
 
 	private void setInputs(double[] inputs) {

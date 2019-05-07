@@ -37,13 +37,13 @@ public class NeatAlgorithm {
 			});
 		});
 
-		population = new Population(genome);
+		population = new Population(genome, true);
 	}
 	
 	public NeatAlgorithm(Genome initialGenome) {
 		random = new Random();
 
-		population = new Population(initialGenome);
+		population = new Population(initialGenome, false);
 	}
 
 	public double[] calculateFittest(double[] inputs) {

@@ -15,10 +15,12 @@ public class Population {
 	private List<Genome> nextPopulation = new ArrayList<Genome>();
 	private int generationNr = 0;
 
-	public Population(Genome initialGenome) {
+	public Population(Genome initialGenome, boolean randomizeWeights) {
 		for (int i = 0; i < Parameters.populationSize; ++i) {
 			Genome genomeCopy = initialGenome.copy();
-			genomeCopy.randomizeWeights();
+			if (randomizeWeights) {
+				genomeCopy.randomizeWeights();
+			}
 			population.add(genomeCopy);
 		}
 	}
