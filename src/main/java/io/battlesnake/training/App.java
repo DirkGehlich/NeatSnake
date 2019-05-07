@@ -42,14 +42,17 @@ public class App {
 		if (population.getGenerationNo() % 10 == 0) {
 			TrainingsSnake bestSnake = population.getBestSnake();
 			if (bestSnake != null) {
+				LOG.info(" ");
 				LOG.info("# Generation: {}", population.getGenerationNo());
 				LOG.info("Lifetime: {}", bestSnake.getLifetime());
 				LOG.info("Length: {}", bestSnake.getBody().size());
 				LOG.info("Fitness: {}", bestSnake.getFitness());
+				LOG.info("Number Connections: {}", bestSnake.getBrain().getConnectionGenes().size());
+				LOG.info("Number Nodes: {}", bestSnake.getBrain().getNodeGenes().size());
 			}
 		}
 	}
-
+	
 	public void saveBestSnake() {
 
 		if (population.getGenerationNo() % 500 == 0) {

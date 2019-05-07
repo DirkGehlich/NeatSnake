@@ -143,10 +143,11 @@ public class TrainingsSnake extends NeatSnake {
 	public void calculateFitness() {
 		// Try to help the snake learn that eating is healthy
 
-		int len = body.size();
+		//int len = body.size();
 
 //		fitness = (long)Math.floor(Math.pow(len - 2, 2)) * lifetime;
-		fitness = (long) len * lifetime * lifetime * (killedSnakes + 1);
+		//fitness = (long) len * lifetime * lifetime;
+		fitness = lifetime/10;
 		brain.setFitness(fitness);
 
 //		

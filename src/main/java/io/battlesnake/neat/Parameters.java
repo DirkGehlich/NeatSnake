@@ -16,7 +16,7 @@ public class Parameters {
 	public static float addNodeMutationChance = 0.03f;
 	public static float addConnectionMutationChance = 0.05f;
 	public static float removeWeakestGenomesPercentage = 0.5f;
-	public static int populationSize = 150;
+	public static int populationSize = 100;
 	public static float minWeight = -30.0f;
 	public static float maxWeight = 30.0f;
 	

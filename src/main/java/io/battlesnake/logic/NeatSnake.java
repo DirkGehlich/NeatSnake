@@ -11,7 +11,7 @@ public class NeatSnake extends Snake {
 
 	protected Genome brain = null;
 
-	private double[] inputs = new double[13];
+	private double[] inputs = new double[17];
 	protected Board board;
 
 	public NeatSnake(Snake snake) {
@@ -103,7 +103,35 @@ public class NeatSnake extends Snake {
 
 		return null;
 	}
+	
+	protected Field getDirectionBackLeft(Field movementDirection) {
+		if (movementDirection.getX() == 0 && movementDirection.getY() == -1) {
+			return new Field(-1, 1);
+		} else if (movementDirection.getX() == 1 && movementDirection.getY() == 0) {
+			return new Field(-1, -1);
+		} else if (movementDirection.getX() == 0 && movementDirection.getY() == 1) {
+			return new Field(1, -1);
+		} else if (movementDirection.getX() == -1 && movementDirection.getY() == 0) {
+			return new Field(1, 1);
+		}
 
+		return null;
+	}
+	
+	protected Field getDirectionBackRight(Field movementDirection) {
+		if (movementDirection.getX() == 0 && movementDirection.getY() == -1) {
+			return new Field(1, 1);
+		} else if (movementDirection.getX() == 1 && movementDirection.getY() == 0) {
+			return new Field(-1, 1);
+		} else if (movementDirection.getX() == 0 && movementDirection.getY() == 1) {
+			return new Field(-1, -1);
+		} else if (movementDirection.getX() == -1 && movementDirection.getY() == 0) {
+			return new Field(1, -1);
+		}
+
+		return null;
+	}
+	
 	protected void look() {
 
 		Field directionStraight = getMovementDirecton();
@@ -111,6 +139,8 @@ public class NeatSnake extends Snake {
 		Field directionRight = getDirectionRight(directionStraight);
 		Field directionStraightLeft = getDirectionStraightLeft(directionStraight);
 		Field directionStraightRight = getDirectionStraightRight(directionStraight);
+		Field directionBackLeft = getDirectionBackLeft(directionStraight);
+		Field directionBackRight = getDirectionBackRight(directionStraight);
 
 		inputs[0] = getDistanceToWall(directionStraight);
 		inputs[1] = getDistanceToWall(directionLeft);
@@ -121,12 +151,16 @@ public class NeatSnake extends Snake {
 		inputs[5] = getDistanceToEnemy(directionRight);
 		inputs[6] = getDistanceToEnemy(directionStraightLeft);
 		inputs[7] = getDistanceToEnemy(directionStraightRight);
+		inputs[8] = getDistanceToEnemy(directionBackLeft);
+		inputs[9] = getDistanceToEnemy(directionBackRight);
 
-		inputs[8] = getDistanceToFood(directionStraight);
-		inputs[9] = getDistanceToFood(directionLeft);
-		inputs[10] = getDistanceToFood(directionRight);
-		inputs[11] = getDistanceToFood(directionStraightLeft);
-		inputs[12] = getDistanceToFood(directionStraightRight);
+		inputs[10] = getDistanceToFood(directionStraight);
+		inputs[11] = getDistanceToFood(directionLeft);
+		inputs[12] = getDistanceToFood(directionRight);
+		inputs[13] = getDistanceToFood(directionStraightLeft);
+		inputs[14] = getDistanceToFood(directionStraightRight);
+		inputs[15] = getDistanceToFood(directionBackLeft);
+		inputs[16] = getDistanceToFood(directionBackRight);
 	}
 
 	private double getDistanceToWall(Field direction) {
