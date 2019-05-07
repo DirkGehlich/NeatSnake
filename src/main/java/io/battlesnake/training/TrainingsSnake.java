@@ -12,7 +12,7 @@ import io.battlesnake.world.Field;
 
 public class TrainingsSnake extends NeatSnake {
 
-	private final int MAXFOOD = 4;
+	private final int MAXFOOD = 5;
 	private final int BOARD_SIZE_X;
 	private final int BOARD_SIZE_Y;
 	private boolean isDead = false;
@@ -21,7 +21,6 @@ public class TrainingsSnake extends NeatSnake {
 	private int lifetime = 0;
 	private List<Field> food = new ArrayList<Field>();
 	private EnemySnakes enemySnakes = new EnemySnakes();
-	private int killedSnakes = 0;
 
 	private Random random = new Random();
 
@@ -112,14 +111,10 @@ public class TrainingsSnake extends NeatSnake {
 
 		// Hit enemy snake
 		for (EnemySnake enemySnake : enemySnakes) {
-			for (int i=1; i<enemySnake.getBody().size(); ++i) {
-				if (head.equals(enemySnake.getBody().get(i))) {
+			for (Field bodyPart : enemySnake.getBody()) {
+				if (head.equals(bodyPart)) {
 					kill();
 				}
-			}
-			
-			if (head.equals(enemySnake.getHeadPosition()) && body.size() > enemySnake.getBody().size()) {
-				++killedSnakes;
 			}
 		}
 
@@ -143,11 +138,11 @@ public class TrainingsSnake extends NeatSnake {
 	public void calculateFitness() {
 		// Try to help the snake learn that eating is healthy
 
-		//int len = body.size();
+		int len = body.size();
 
 //		fitness = (long)Math.floor(Math.pow(len - 2, 2)) * lifetime;
-		//fitness = (long) len * lifetime * lifetime;
-		fitness = lifetime/10;
+		fitness = (long) len * lifetime * lifetime;
+//		fitness = lifetime/10;
 		brain.setFitness(fitness);
 
 //		

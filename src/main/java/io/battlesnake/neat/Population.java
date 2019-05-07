@@ -36,8 +36,7 @@ public class Population {
 
 		for (ConnectionGene parent1Connection : parent1.getConnectionGenes()) {
 			ConnectionGene parent2Connection = parent2.getConnectionGenes().stream()
-					.filter(c -> c.getInnovationNr() == parent1Connection.getInnovationNr()).findFirst()
-					.orElse(null);
+					.filter(c -> c.getInnovationNr() == parent1Connection.getInnovationNr()).findFirst().orElse(null);
 
 			if (parent2Connection != null) {
 				child.addConnectionGene(random.nextBoolean() ? parent1Connection.copy() : parent2Connection.copy());
@@ -54,7 +53,10 @@ public class Population {
 		cleanupTemps();
 		addGenomesToSpecies();
 		removeEmptySpecies();
+		adjustCompatibilityThreshold();
 		setAdjustedFitnessToGenomes();
+		// TODO: remove species which have not improved within last 15 generations
+		// (using some delta)
 		removeWeakestGenomesFromEachSpecies();
 		addBestGenomesOfEachSpeciesToNewGeneration();
 		breedPopulation();
@@ -63,19 +65,19 @@ public class Population {
 
 	private void removeWeakestGenomesFromEachSpecies() {
 		for (Species s : species) {
-			int numGenomesToRemove = (int)(s.size() * Parameters.removeWeakestGenomesPercentage);
+			int numGenomesToRemove = (int) (s.size() * Parameters.removeWeakestGenomesPercentage);
 			s.sortSpeciesByFitness();
 			ListIterator<Genome> iter = s.listIterator(s.size());
-			
+
 			while (iter.hasPrevious() && numGenomesToRemove > 0) {
 				--numGenomesToRemove;
 				Genome g = iter.previous();
 				int idx = population.indexOf(g);
 				population.remove(idx);
-				iter.remove();				
+				iter.remove();
 			}
 		}
-		
+
 	}
 
 	private void cleanupTemps() {
@@ -89,6 +91,24 @@ public class Population {
 			Species species = i.next();
 			if (species.size() == 0) {
 				i.remove();
+			}
+		}
+	}
+
+	/**
+	 * adjust compatibility threshold to limit the number of species to our target
+	 * this way we do not allow for too many genomes to grow uncontrolled within
+	 * their species
+	 */
+	private void adjustCompatibilityThreshold() {
+
+		if (species.size() > Parameters.targetSpeciesCount) {
+			Parameters.compatibilityThreshold += Parameters.compatibilityThresholdChange;
+
+		} else if (species.size() < Parameters.targetSpeciesCount) {
+			Parameters.compatibilityThreshold -= Parameters.compatibilityThresholdChange;
+			if (Parameters.compatibilityThreshold < 0) {
+				Parameters.compatibilityThreshold = 0;
 			}
 		}
 	}
@@ -130,8 +150,9 @@ public class Population {
 				this.species.add(s);
 			}
 		}
+
 	}
-	
+
 	/**
 	 * An adjusted fitness is the fitness of a genome divided by the number of
 	 * genomes within its species
@@ -214,12 +235,13 @@ public class Population {
 		return adjustedFitnessSum;
 	}
 
-	public Genome getFittestGenome() {		
+	public Genome getFittestGenome() {
 		if (population.isEmpty()) {
 			throw new RuntimeException("Cannot get fittest genome as the population is empty");
 		}
-		
-		Collections.sort(population, (a, b) -> a.getFitness() < b.getFitness() ? 1 : a.getFitness() == b.getFitness() ? 0 : -1);
+
+		Collections.sort(population,
+				(a, b) -> a.getFitness() < b.getFitness() ? 1 : a.getFitness() == b.getFitness() ? 0 : -1);
 		return population.get(0);
 	}
 
