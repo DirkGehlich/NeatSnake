@@ -44,6 +44,12 @@ public class NeatSnake extends Snake {
 
 		Field direction = head.clone();
 		direction.substract(firstTail);
+		
+		// When starting the game, the whole body is on one location, so there is no direction. Just go to top
+		if (direction.getX() == 0 && direction.getY() == 0) {
+			direction.setX(0);
+			direction.setY(-1);
+		}
 
 		return direction;
 	}

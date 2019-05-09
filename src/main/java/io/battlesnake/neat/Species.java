@@ -13,7 +13,9 @@ public class Species extends ArrayList<Genome> {
 
 	private Genome representative;
 	private double adjustedFitness = 0;
-
+	private double avgAdjustedFitness = 0;
+	private int stagnationCounter = 0;
+	
 	public Species(Genome representative) {
 		this.representative = representative;
 		this.add(representative);
@@ -74,5 +76,21 @@ public class Species extends ArrayList<Genome> {
 		}
 		
 		return adjustedFitnessSum;
+	}
+	
+	public void increaseStagnationCounter() {
+		++stagnationCounter;
+	}
+	
+	public boolean isStagnated() {
+		return stagnationCounter >= Parameters.maxStagnationCount; 
+	}
+
+	public double getAvgAdjustedFitness() {
+		return avgAdjustedFitness;
+	}
+
+	public void setAvgAdjustedFitness(double avgAdjustedFitness) {
+		this.avgAdjustedFitness = avgAdjustedFitness;
 	}
 }

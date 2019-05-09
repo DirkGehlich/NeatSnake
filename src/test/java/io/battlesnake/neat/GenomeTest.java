@@ -146,14 +146,15 @@ class GenomeTest {
 		NodeGene gene2 = new NodeGene(Type.Output, InnovationNrGenerator.getNext());
 		ConnectionGene connection = new ConnectionGene(gene1.getInnovationNr(), gene2.getInnovationNr(), 0.3f, true, InnovationNrGenerator.getNext());
 
-		when(random.nextFloat()).thenReturn(0.99f, 0.89f);
+		when(random.nextGaussian()).thenReturn(0.75);
+		when(random.nextFloat()).thenReturn(0.89f);
 		genome.addNodeGene(gene1);
 		genome.addNodeGene(gene2);
 		genome.addConnectionGene(connection);
 
 		genome.performWeightMutation();
 
-		assertEquals(1.77, genome.getConnectionGenes().get(0).getWeight(), 0.001f);
+		assertEquals(0.675, genome.getConnectionGenes().get(0).getWeight(), 0.001);
 	}
 
 	@Test
@@ -169,7 +170,7 @@ class GenomeTest {
 
 		genome.performWeightMutation();
 
-		assertEquals(-22.8f, genome.getConnectionGenes().get(0).getWeight(), 0.01f);
+		assertEquals(0.3, genome.getConnectionGenes().get(0).getWeight(), 0.01);
 	}
 
 	@Test

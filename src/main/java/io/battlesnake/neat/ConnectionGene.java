@@ -10,10 +10,10 @@ public class ConnectionGene extends Gene  implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private int inNodeInnovationNr;
 	private int outNodeInnovationNr;
-	private float weight;
+	private double weight;
 	private boolean enabled;
 
-	public ConnectionGene(int inNodeInnovationNr, int outNodeInnovationNr, float weight, boolean enabled,
+	public ConnectionGene(int inNodeInnovationNr, int outNodeInnovationNr, double weight, boolean enabled,
 			int innovationNr) {
 		super(innovationNr);
 		this.inNodeInnovationNr = inNodeInnovationNr;
@@ -34,11 +34,11 @@ public class ConnectionGene extends Gene  implements Serializable {
 		return outNodeInnovationNr;
 	}
 
-	public float getWeight() {
+	public double getWeight() {
 		return weight;
 	}
 
-	public void setWeight(float weight) {
+	public void setWeight(double weight) {
 		this.weight = weight;
 	}
 

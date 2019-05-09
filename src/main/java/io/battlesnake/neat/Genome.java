@@ -94,9 +94,10 @@ public class Genome implements Serializable {
 	public void performWeightMutation() {
 		for (ConnectionGene connection : connectionGenes) {
 			// TODO: use gausian with some weight mutation power instead of 1.0 as standard deviation?
-			float rnd = Parameters.minWeight + random.nextFloat() * (Parameters.maxWeight - Parameters.minWeight);
-			if (random.nextFloat() < Parameters.weightPerturbingChance) {
-				float newWeight = connection.getWeight() + rnd * Parameters.weightPerturbingStep;
+			//float rnd = Parameters.minWeight + random.nextFloat() * (Parameters.maxWeight - Parameters.minWeight);
+			double rnd = random.nextGaussian() * Parameters.weightMutationPower;
+			if (random.nextFloat() < Parameters.weightPerturbingChance) {				
+				double newWeight = connection.getWeight() + rnd;
 				if (newWeight > Parameters.maxWeight) {
 					newWeight = Parameters.maxWeight;
 				}
@@ -209,7 +210,29 @@ public class Genome implements Serializable {
 		addConnectionGene(connectionIn);
 		addConnectionGene(connectionOut);
 	}
-
+	
+	private void performDeleteNodeMutation() {
+		List<NodeGene> hiddenNodes = nodeGenes.stream().filter(n -> n.getType() == Type.Hidden).collect(Collectors.toList());
+		if (hiddenNodes.isEmpty()) {
+			return;
+		}
+		
+		NodeGene hiddenNode = hiddenNodes.get(random.nextInt(hiddenNodes.size()));
+		
+		connectionGenes.removeIf(c -> c.getInNodeInnovationNr() == hiddenNode.getInnovationNr() || c.getOutNodeInnovationNr() == hiddenNode.getInnovationNr());
+		nodeGenes.remove(hiddenNode);
+	}
+	
+	private void performDeleteConnectionMutation() {
+		if (connectionGenes.isEmpty()) {
+			return;
+		}
+		
+		ConnectionGene connection = connectionGenes.get(random.nextInt(connectionGenes.size()));
+		
+		connectionGenes.remove(connection);
+	}
+	
 	public NodeGenes getNodeGenes() {
 		return nodeGenes;
 	}
@@ -293,13 +316,23 @@ public class Genome implements Serializable {
 		if (random.nextFloat() < Parameters.addNodeMutationChance) {
 			performAddNodeMutation();
 		}
+		
+		if (random.nextFloat() < Parameters.deleteNodeMutationChance) {
+			performDeleteNodeMutation();
+		}
 
 		if (random.nextFloat() < Parameters.addConnectionMutationChance) {
 			performAddConnectionMutation();
 		}
 		
+		if (random.nextFloat() < Parameters.deleteConnectionMutationChance) {
+			performDeleteConnectionMutation();
+		}
+		
 		// TODO: remove connection mutation (remove node if not in and out node connected anymore?)
 	}
+
+	
 
 	private void setInputs(double[] inputs) {
 		List<NodeGene> inputNodes = getNodeGenes().stream().filter(g -> g.getType() == Type.Input)

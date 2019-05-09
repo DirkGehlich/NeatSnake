@@ -57,12 +57,27 @@ public class Population {
 		removeEmptySpecies();
 		adjustCompatibilityThreshold();
 		setAdjustedFitnessToGenomes();
+		removeStagnatedSpecies();
+		removeEmptySpecies();
 		// TODO: remove species which have not improved within last 15 generations
 		// (using some delta)
 		removeWeakestGenomesFromEachSpecies();
 		addBestGenomesOfEachSpeciesToNewGeneration();
 		breedPopulation();
 		++generationNr;
+	}
+
+	private void removeStagnatedSpecies() {
+		for (Species species : species) {
+			if (species.isStagnated()) {
+				ListIterator<Genome> iter = species.listIterator();
+				while (iter.hasNext()) {
+					Genome g = iter.next();
+					population.remove(g);
+					iter.remove();
+				}
+			}
+		}		
 	}
 
 	private void removeWeakestGenomesFromEachSpecies() {
@@ -146,8 +161,6 @@ public class Population {
 			}
 
 			if (!speciesFound) {
-				// TODO: improvement: If too many species (more than 10?), increase
-				// compatibility threshold to create less new species
 				Species s = new Species(genome);
 				this.species.add(s);
 			}
@@ -161,11 +174,18 @@ public class Population {
 	 */
 	private void setAdjustedFitnessToGenomes() {
 		for (Species species : this.species) {
+			
 			for (Genome genome : species) {
 				double fitness = genome.getFitness();
 				double adjustedFitness = fitness / species.size();
 				genome.setAdjustedFitness(adjustedFitness);
 				species.addAdjustedFitness(adjustedFitness);
+			}
+			
+			double oldAvgAdjustedFitness = species.getAvgAdjustedFitness();
+			species.setAvgAdjustedFitness(species.getAdjustedFitness() / species.size());
+			if (species.getAvgAdjustedFitness() <= oldAvgAdjustedFitness) {
+				species.increaseStagnationCounter();
 			}
 		}
 
