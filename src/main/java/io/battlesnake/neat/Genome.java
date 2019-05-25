@@ -95,14 +95,15 @@ public class Genome implements Serializable {
 		for (ConnectionGene connection : connectionGenes) {
 			// TODO: use gausian with some weight mutation power instead of 1.0 as standard deviation?
 			//float rnd = Parameters.minWeight + random.nextFloat() * (Parameters.maxWeight - Parameters.minWeight);
-			double rnd = random.nextGaussian() * Parameters.weightMutationPower;
-			if (random.nextFloat() < Parameters.weightPerturbingChance) {				
-				double newWeight = connection.getWeight() + rnd;
+			
+			if (random.nextFloat() < Parameters.weightPerturbingChance) {	
+				double newWeight = connection.getWeight() + random.nextGaussian() * Parameters.weightMutationPower;
 				if (newWeight > Parameters.maxWeight) {
 					newWeight = Parameters.maxWeight;
 				}
 				connection.setWeight(newWeight);
 			} else {
+				float rnd = Parameters.minWeight + random.nextFloat() * (Parameters.maxWeight - Parameters.minWeight);
 				connection.setWeight(rnd);
 			}
 		}
@@ -243,56 +244,81 @@ public class Genome implements Serializable {
 
 	public float calculateCompatibilityDistanceTo(Genome genome) {
 
-		int cntExcessGenes = 0;
-		int cntDisjointGenes = 0;
-		int cntGenesLargerGenome = 0;
 		int cntMatchingGenes = 0;
 		float weightDiffSum = 0;
-
+		
 		ConnectionGenes genome1Connections = getConnectionGenes();
 		ConnectionGenes genome2Connections = genome.getConnectionGenes();
-
-		int maxGenome1InnovatioNr = genome1Connections.getMaxInnovationNr();
-		int maxGenome2InnovatioNr = genome2Connections.getMaxInnovationNr();
-
-		int cntGenome1Connections = genome1Connections.size();
-		int cntGenome2Connections = genome2Connections.size();
-		cntGenesLargerGenome = Math.max(cntGenome1Connections, cntGenome2Connections);
-
-		for (int i = 0; i < cntGenome1Connections; ++i) {
+		
+		int smallerGenomeSize = Math.min(genome1Connections.size(), genome2Connections.size());
+		
+		for (int i=0; i<smallerGenomeSize; ++i) {
 			ConnectionGene connection1 = genome1Connections.get(i);
-
+			
 			if (genome2Connections.contains(connection1)) {
 				cntMatchingGenes++;
-
 				ConnectionGene connection2 = genome2Connections.getConnectionGene(connection1.getInnovationNr());
 				weightDiffSum += Math.abs(connection1.getWeight() - connection2.getWeight());
-			} else {
-				if (connection1.getInnovationNr() < maxGenome2InnovatioNr) {
-					cntDisjointGenes++;
-				} else {
-					cntExcessGenes++;
-				}
 			}
 		}
-
-		for (int i = 0; i < cntGenome2Connections; ++i) {
-			ConnectionGene connection2 = genome2Connections.get(i);
-			if (!genome1Connections.contains(connection2)) {
-				if (connection2.getInnovationNr() < maxGenome1InnovatioNr) {
-					cntDisjointGenes++;
-				} else {
-					cntExcessGenes++;
-				}
-			}
-		}
-
-		int n = cntGenesLargerGenome > 20 ? cntGenesLargerGenome : 1;
+		
+		int cntNonMatchingGenes = genome1Connections.size() + genome2Connections.size() -2 * cntMatchingGenes;
+		
 		float avgWeightDifference = (float) weightDiffSum / cntMatchingGenes;
-
-		float delta = (float) (Parameters.c1 * cntExcessGenes / n) + (float) (Parameters.c2 * cntDisjointGenes / n)
-				+ Parameters.c3 * avgWeightDifference;
+		float delta = Parameters.c1 * cntNonMatchingGenes + Parameters.c3 * avgWeightDifference;
+		
 		return delta;
+		
+//		int cntExcessGenes = 0;
+//		int cntDisjointGenes = 0;
+//		int cntGenesLargerGenome = 0;
+//		int cntMatchingGenes = 0;
+//		float weightDiffSum = 0;
+//
+//		ConnectionGenes genome1Connections = getConnectionGenes();
+//		ConnectionGenes genome2Connections = genome.getConnectionGenes();
+//
+//		int maxGenome1InnovatioNr = genome1Connections.getMaxInnovationNr();
+//		int maxGenome2InnovatioNr = genome2Connections.getMaxInnovationNr();
+//
+//		int cntGenome1Connections = genome1Connections.size();
+//		int cntGenome2Connections = genome2Connections.size();
+//		cntGenesLargerGenome = Math.max(cntGenome1Connections, cntGenome2Connections);
+//
+//		for (int i = 0; i < cntGenome1Connections; ++i) {
+//			ConnectionGene connection1 = genome1Connections.get(i);
+//
+//			if (genome2Connections.contains(connection1)) {
+//				cntMatchingGenes++;
+//
+//				ConnectionGene connection2 = genome2Connections.getConnectionGene(connection1.getInnovationNr());
+//				weightDiffSum += Math.abs(connection1.getWeight() - connection2.getWeight());
+//			} else {
+//				if (connection1.getInnovationNr() < maxGenome2InnovatioNr) {
+//					cntDisjointGenes++;
+//				} else {
+//					cntExcessGenes++;
+//				}
+//			}
+//		}
+//
+//		for (int i = 0; i < cntGenome2Connections; ++i) {
+//			ConnectionGene connection2 = genome2Connections.get(i);
+//			if (!genome1Connections.contains(connection2)) {
+//				if (connection2.getInnovationNr() < maxGenome1InnovatioNr) {
+//					cntDisjointGenes++;
+//				} else {
+//					cntExcessGenes++;
+//				}
+//			}
+//		}
+//
+//		int n = cntGenesLargerGenome > 20 ? cntGenesLargerGenome : 1;
+//		float avgWeightDifference = (float) weightDiffSum / cntMatchingGenes;
+//
+//		float delta = (float) (Parameters.c1 * cntExcessGenes / n) + (float) (Parameters.c2 * cntDisjointGenes / n)
+//				+ Parameters.c3 * avgWeightDifference;
+//		return delta;
 	}
 
 	/**
@@ -421,6 +447,17 @@ public class Genome implements Serializable {
 		}
 		
 		return genome;
+	}
+	
+	@Override
+	public String toString() {
+		String s = "\n\nGenome\n-------------------\n";
+		
+		s += String.format("Number nodes: %d\nNumber connections: %d\n\n", nodeGenes.size(), connectionGenes.size());
+		s += nodeGenes.toString() + "\n";
+		s += connectionGenes.toString();
+		
+		return s;
 	}
 
 }

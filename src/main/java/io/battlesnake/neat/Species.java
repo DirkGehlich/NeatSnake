@@ -82,6 +82,10 @@ public class Species extends ArrayList<Genome> {
 		++stagnationCounter;
 	}
 	
+	public void resetStagnationCounter() {
+		stagnationCounter = 0;
+	}
+	
 	public boolean isStagnated() {
 		return stagnationCounter >= Parameters.maxStagnationCount; 
 	}

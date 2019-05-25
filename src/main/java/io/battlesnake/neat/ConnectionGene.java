@@ -53,5 +53,10 @@ public class ConnectionGene extends Gene  implements Serializable {
 	public void enable() {
 		this.enabled = true;
 	}
+	
+	@Override
+	public String toString() {
+		return String.format("%d --%s--> %d: %f", inNodeInnovationNr, Boolean.toString(enabled), outNodeInnovationNr, weight); 
+	}
 
 }

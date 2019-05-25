@@ -15,7 +15,7 @@ public class NodeGenes extends ArrayList<NodeGene>  implements Serializable {
 	
 	private NodeGenes(NodeGenes nodeGenes) {
 		for (NodeGene node : nodeGenes) {
-			add(node);
+			add(node.copy());
 		}		
 	}
 	
@@ -27,4 +27,13 @@ public class NodeGenes extends ArrayList<NodeGene>  implements Serializable {
 		return stream().filter(n -> n.getInnovationNr() == innovationNr).findFirst().orElseThrow(() -> new RuntimeException("NodeGene not found!"));
 	}
 	
+	@Override
+	public String toString() {
+		String s = "Nodes\n-------------------\n";
+		for (NodeGene node : this) {
+			s += node.toString() + "\n";
+		}
+		
+		return s;
+	}
 }

@@ -84,4 +84,9 @@ public class NodeGene extends Gene  implements Serializable {
 	public void addWeightedInputSum(double weightedInputSum) {
 		this.weightedInputSum  += weightedInputSum;
 	}
+	
+	@Override
+	public String toString() {
+		return String.format("%s - %d", type, innovationNr);
+	}
 }

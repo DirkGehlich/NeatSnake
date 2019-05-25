@@ -15,16 +15,19 @@ public class Population {
 	private List<Genome> nextPopulation = new ArrayList<Genome>();
 	private int generationNr = 0;
 
-	public Population(Genome initialGenome, boolean randomizeWeights) {
+	public Population(Genome initialGenome) {
 		for (int i = 0; i < Parameters.populationSize; ++i) {
 			Genome genomeCopy = initialGenome.copy();
-			if (randomizeWeights) {
-				genomeCopy.randomizeWeights();
-			}
 			population.add(genomeCopy);
 		}
 	}
 
+	public void randomizeAllWeights() {
+		for (Genome genome : population) {
+			genome.randomizeWeights();
+		}
+	}
+	
 	public Genome crossover(Genome parent1, Genome parent2) {
 
 		Genome child = new Genome(random);
@@ -50,6 +53,12 @@ public class Population {
 		return child;
 	}
 
+	public void mutate() {
+		for (Genome genome : this.population) {
+			genome.mutate();
+		}
+	}
+
 	public void createNewGeneration() {
 		resetAllSpecies();
 		cleanupTemps();
@@ -59,17 +68,26 @@ public class Population {
 		setAdjustedFitnessToGenomes();
 		removeStagnatedSpecies();
 		removeEmptySpecies();
-		// TODO: remove species which have not improved within last 15 generations
-		// (using some delta)
 		removeWeakestGenomesFromEachSpecies();
 		addBestGenomesOfEachSpeciesToNewGeneration();
 		breedPopulation();
+
 		++generationNr;
 	}
 
 	private void removeStagnatedSpecies() {
-		for (Species species : species) {
+		Collections.sort(species, (s1, s2) -> s1.getAvgAdjustedFitness() < s2.getAvgAdjustedFitness() ? 1
+				: s1.getAvgAdjustedFitness() == s2.getAvgAdjustedFitness() ? 0 : -1);
+
+		// "In rare cases when the fitness of the entire population does not improve for
+		// more than 20 generations,"
+		// "only the top two species are allowed to reproduce, refocusing the search
+		// into the most promising spaces."
+		int numSpeciesLeft = species.size() - 2;
+		for (int i = 0; i < this.species.size() && numSpeciesLeft > 0; ++i) {
+			Species species = this.species.get(i);
 			if (species.isStagnated()) {
+				--numSpeciesLeft;
 				ListIterator<Genome> iter = species.listIterator();
 				while (iter.hasNext()) {
 					Genome g = iter.next();
@@ -77,12 +95,15 @@ public class Population {
 					iter.remove();
 				}
 			}
-		}		
+		}
 	}
 
 	private void removeWeakestGenomesFromEachSpecies() {
 		for (Species s : species) {
 			int numGenomesToRemove = (int) (s.size() * Parameters.removeWeakestGenomesPercentage);
+			if (s.size() <= 5) {
+				numGenomesToRemove = 0;
+			}
 			s.sortSpeciesByFitness();
 			ListIterator<Genome> iter = s.listIterator(s.size());
 
@@ -174,18 +195,21 @@ public class Population {
 	 */
 	private void setAdjustedFitnessToGenomes() {
 		for (Species species : this.species) {
-			
+
 			for (Genome genome : species) {
 				double fitness = genome.getFitness();
 				double adjustedFitness = fitness / species.size();
 				genome.setAdjustedFitness(adjustedFitness);
 				species.addAdjustedFitness(adjustedFitness);
 			}
-			
+
 			double oldAvgAdjustedFitness = species.getAvgAdjustedFitness();
 			species.setAvgAdjustedFitness(species.getAdjustedFitness() / species.size());
 			if (species.getAvgAdjustedFitness() <= oldAvgAdjustedFitness) {
 				species.increaseStagnationCounter();
+			}
+			else {
+				species.resetStagnationCounter();
 			}
 		}
 
@@ -197,7 +221,7 @@ public class Population {
 	private void addBestGenomesOfEachSpeciesToNewGeneration() {
 		for (Species species : this.species) {
 			if (species.size() >= Parameters.minNumberGenomesForBest) {
-				nextPopulation.add(species.getBestGenome());
+				nextPopulation.add(species.getBestGenome().copy());
 			}
 		}
 	}

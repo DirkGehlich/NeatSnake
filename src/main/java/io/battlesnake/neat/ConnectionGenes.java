@@ -68,4 +68,14 @@ public class ConnectionGenes extends ArrayList<ConnectionGene>  implements Seria
 		
 		return false;
 	}
+	
+	@Override
+	public String toString()  {
+		String s = "Connections\n-------------------\n";
+		for (ConnectionGene connection : this) {
+			s += connection.toString() + "\n";
+		}
+		
+		return s;
+	}
 }

@@ -1,5 +1,7 @@
 package io.battlesnake.training;
 
+import java.io.File;
+
 import org.apache.log4j.BasicConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +19,14 @@ public class App {
 	}
 
 	public App() {
-		population = new Population(Settings.BOARDSIZE_X, Settings.BOARDSIZE_Y);
+		File savedNN = new File("savednn.nnet");
+		if (savedNN.exists()) {
+			population = new Population(Settings.BOARDSIZE_X, Settings.BOARDSIZE_Y, "savednn.nnet");
+		}
+		else {
+			population = new Population(Settings.BOARDSIZE_X, Settings.BOARDSIZE_Y);	
+		}
+		
 		enemySnakes = new EnemySnakes();
 	}
 

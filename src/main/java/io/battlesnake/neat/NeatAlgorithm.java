@@ -37,13 +37,18 @@ public class NeatAlgorithm {
 			});
 		});
 
-		population = new Population(genome, true);
+		population = new Population(genome);
+		population.randomizeAllWeights();
+		population.mutate();
 	}
-	
-	public NeatAlgorithm(Genome initialGenome) {
+		
+	public NeatAlgorithm(Genome initialGenome, boolean mutateInitially) {
 		random = new Random();
 
-		population = new Population(initialGenome, false);
+		population = new Population(initialGenome);
+		if (mutateInitially) {
+			population.mutate();
+		}
 	}
 
 	public double[] calculateFittest(double[] inputs) {

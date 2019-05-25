@@ -97,6 +97,14 @@ public class TrainingsSnake extends NeatSnake {
 
 		food.remove(eatenFood);
 		Field newFood = new Field(random.nextInt(BOARD_SIZE_X), random.nextInt(BOARD_SIZE_Y));
+//		
+//		if (eatenFood.getX() == 1 && eatenFood.getY() == 1) {
+//			food.add(new Field(8,8));
+//		}
+//		else {
+//			food.add(new Field(1,1));
+//		}
+//		Field newFood = new Field(1,1);
 		food.add(newFood);
 	}
 

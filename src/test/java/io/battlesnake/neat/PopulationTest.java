@@ -28,7 +28,7 @@ class PopulationTest {
 		genome2.performAddNodeMutation();
 		genome2.setFitness(10);
 		
-		Population pop = new Population(genome1, false);
+		Population pop = new Population(genome1);
 		pop.getPopulation().add(genome2);
 		
 		Genome child = pop.crossover(genome2, genome1);

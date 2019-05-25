@@ -154,7 +154,7 @@ class GenomeTest {
 
 		genome.performWeightMutation();
 
-		assertEquals(0.675, genome.getConnectionGenes().get(0).getWeight(), 0.001);
+		assertEquals(2.175, genome.getConnectionGenes().get(0).getWeight(), 0.001);
 	}
 
 	@Test
@@ -210,7 +210,7 @@ class GenomeTest {
 
 		float distance = genome1.calculateCompatibilityDistanceTo(genome2);
 		
-		assertEquals(0.92, distance, 0.001f);
+		assertEquals(0.62, distance, 0.001f);
 	}
 	
 	private Genome createXORGenome() {

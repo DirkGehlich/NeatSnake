@@ -33,7 +33,6 @@ public class Population {
 		this.BOARD_SIZE_X = boardSizeX;
 		this.BOARD_SIZE_Y = boardSizeY;
 
-		// TODO: change to relative direction to reduce number of inputs and outputs
 		neat = new NeatAlgorithm(17, 3);
 		for (Genome genome : neat.getPopulation().getPopulation()) {
 			TrainingsSnake snake = new TrainingsSnake(BOARD_SIZE_X, BOARD_SIZE_Y, createInitialBody(), genome);
@@ -47,7 +46,7 @@ public class Population {
 		this.BOARD_SIZE_Y = boardSizeY;
 		
 		Genome brain = Genome.loadFromFile();
-		neat = new NeatAlgorithm(brain);
+		neat = new NeatAlgorithm(brain, false);
 		for (Genome genome : neat.getPopulation().getPopulation()) {
 			TrainingsSnake snake = new TrainingsSnake(BOARD_SIZE_X, BOARD_SIZE_Y, createInitialBody(), genome);
 			snake.generateFood();
